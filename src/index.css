@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar hiding for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animações de Flash para o Módulo 1 (fundo preto) */
+@keyframes flash-red {
+  0%, 100% { background-color: black; }
+  16%, 48% { background-color: #7f1d1d; } /* Cor vermelha escura */
+  32%, 64% { background-color: black; }
+}
+
+@keyframes flash-green {
+  0%, 100% { background-color: black; }
+  16%, 48% { background-color: #064e3b; } /* Cor verde escura */
+  32%, 64% { background-color: black; }
+}
+
+.flash-red {
+  animation: flash-red 0.5s ease-in-out;
+}
+
+.flash-green {
+  animation: flash-green 0.5s ease-in-out;
+}
+
+/* --- MUDANÇA AQUI: Animações de Flash com mais pulsos --- */
+@keyframes flash-image-red {
+  0%, 100% { background-color: white; }
+  10%, 30%, 50%, 70%, 90% { background-color: #fecaca; } /* Vermelho claro */
+  20%, 40%, 60%, 80% { background-color: white; }
+}
+
+@keyframes flash-image-green {
+  0%, 100% { background-color: white; }
+  10%, 30%, 50%, 70%, 90% { background-color: #bbf7d0; } /* Verde claro */
+  20%, 40%, 60%, 80% { background-color: white; }
+}
+
+.flash-image-red {
+  animation: flash-image-red 2.5s ease-in-out;
+}
+
+.flash-image-green {
+  animation: flash-image-green 2.5s ease-in-out;
+}
+
+/* Classes para cores de borda estáticas no Módulo 2 */
+.correct-answer-border {
+  border-color: #22c55e; /* Verde */
+}
+
+.wrong-answer-border {
+  border-color: #ef4444; /* Vermelho */
+}
