@@ -15,6 +15,8 @@ const getLanguageFolderName = (langCode: string): string => {
 const LessonCompletionPage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
+  
+  // Este estado controla se o áudio está tocando
   const [isAudioPlaying, setIsAudioPlaying] = useState(true);
 
   useEffect(() => {
@@ -22,16 +24,20 @@ const LessonCompletionPage: React.FC = () => {
       const folderName = getLanguageFolderName(lang);
       const audio = new Audio(`/audio/narrations/${folderName}/aula_concluida.mp3`);
       
-      // Quando o áudio terminar de tocar, libera o botão
+      // Quando o áudio terminar, a variável isAudioPlaying vira 'false'
       audio.onended = () => {
         setIsAudioPlaying(false);
       };
 
+      // Tenta tocar o áudio
       audio.play().catch(error => {
         console.error("Erro ao tocar o áudio de conclusão:", error);
-        setIsAudioPlaying(false); // Libera o botão mesmo se houver erro
+        // Se der erro, libera o botão mesmo assim
+        setIsAudioPlaying(false); 
       });
+
     } else {
+        // Se não encontrar o idioma, libera o botão
         setIsAudioPlaying(false);
     }
   }, [lang]);
@@ -46,7 +52,9 @@ const LessonCompletionPage: React.FC = () => {
         </p>
         <button
           onClick={() => navigate(`/${lang}/home`)}
-          disabled={isAudioPlaying} // <-- Botão desabilitado enquanto o áudio toca
+          // A propriedade 'disabled' usa o estado para se desativar/ativar
+          disabled={isAudioPlaying}
+          // As classes 'disabled:*' mudam a aparência do botão quando ele está desativado
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center mx-auto group transition-all duration-300 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
           Ir para o Início
