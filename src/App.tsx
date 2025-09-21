@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 
 import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import LanguageSelectionPage from './components/LanguageSelectionPage';
 import HomePage from './components/HomePage';
@@ -20,6 +21,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         
         <Route path="/selecao-idioma" element={<ProtectedRoute><LanguageSelectionPage /></ProtectedRoute>} />
         
