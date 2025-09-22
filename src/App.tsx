@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 
 import LoginPage from './components/LoginPage';
-import RegisterPage from './components/RegisterPage';
+// O RegisterPage foi removido
 import ProtectedRoute from './components/ProtectedRoute';
 import LanguageSelectionPage from './components/LanguageSelectionPage';
 import HomePage from './components/HomePage';
@@ -20,10 +20,14 @@ function App() {
     <Router>
       <ScrollToTop />
       <Routes>
+        {/* Rotas Públicas */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
         
-        <Route path="/selecao-idioma" element={<ProtectedRoute><LanguageSelectionPage /></ProtectedRoute>} />
+        {/* Rotas Protegidas */}
+        <Route 
+          path="/selecao-idioma" 
+          element={<ProtectedRoute><LanguageSelectionPage /></ProtectedRoute>} 
+        />
         
         {/* Rotas dinâmicas com base no idioma */}
         <Route path="/:lang/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />

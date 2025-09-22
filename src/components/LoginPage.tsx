@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Importar Link
+import { useNavigate } from 'react-router-dom'; // O Link foi removido
 import { supabase } from '../supabaseClient'; // Importa a nossa ligação ao Supabase
 
 const LoginPage: React.FC = () => {
@@ -14,6 +14,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
+    // Lógica de login com o Supabase
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
@@ -89,13 +90,7 @@ const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* --- NOVO LINK PARA A PÁGINA DE REGISTO --- */}
-          <p className="text-center text-gray-400 mt-6">
-            Não tem uma conta?{' '}
-            <Link to="/register" className="text-purple-400 hover:underline">
-              Crie uma aqui
-            </Link>
-          </p>
+          {/* O link para a página de registo foi removido daqui */}
         </div>
       </div>
     </div>
