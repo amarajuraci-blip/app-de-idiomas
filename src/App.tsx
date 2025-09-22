@@ -39,10 +39,10 @@ function App() {
         <Route path="/:lang/modulo/5" element={<ProtectedRoute><Module5Page /></ProtectedRoute>} />
 
         {/* Rota para a tela de conclusão */}
-        <Route 
-          path="/:lang/aula-concluida" 
-          element={<ProtectedRoute><LessonCompletionPage /></ProtectedRoute>} 
-        />
+        <Route
+  path="/:lang/aula-concluida/:lessonId" // <-- Adicionámos /:lessonId
+  element={<ProtectedRoute><LessonCompletionPage /></ProtectedRoute>}
+/>
       </Routes>
     </Router>
   );

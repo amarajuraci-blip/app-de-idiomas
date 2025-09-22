@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'; // useLocation já não é necessário
 import { CheckCircle, ArrowRight } from 'lucide-react';
+import { supabase } from '../supabaseClient';
+import { allLanguageData } from '../data/modules';
 
 const getLanguageFolderName = (langCode: string): string => {
   const map: { [key: string]: string } = {
@@ -14,33 +16,79 @@ const getLanguageFolderName = (langCode: string): string => {
 
 const LessonCompletionPage: React.FC = () => {
   const navigate = useNavigate();
-  const { lang } = useParams<{ lang: string }>();
-  
-  // Este estado controla se o áudio está tocando
+  // Agora obtemos o lessonId diretamente dos parâmetros da URL
+  const { lang, lessonId: lessonIdStr } = useParams<{ lang: string; lessonId: string }>();
+  const lessonId = parseInt(lessonIdStr || '0', 10);
+
   const [isAudioPlaying, setIsAudioPlaying] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(true);
+
+  useEffect(() => {
+    const registerLessonCards = async () => {
+      if (!lang || !lessonId) {
+        setIsRegistering(false);
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Utilizador não autenticado.');
+        const user = session.user;
+
+        const lesson = allLanguageData[lang]?.lessons.find(l => l.id === lessonId);
+        if (!lesson) throw new Error('Lição não encontrada.');
+        const lessonCards = lesson.cards;
+
+        const { data: existingProgress } = await supabase
+          .from('card_progress')
+          .select('card_id')
+          .eq('user_id', user.id)
+          .in('card_id', lessonCards.map(c => c.id));
+
+        const existingCardIds = new Set((existingProgress || []).map(p => p.card_id));
+        
+        const newCardsToInsert = lessonCards
+          .filter(card => !existingCardIds.has(card.id))
+          .map(card => {
+            return {
+              user_id: user.id,
+              card_id: card.id,
+              srs_level: 0,
+              // --- MUDANÇA PRINCIPAL AQUI ---
+              // Agendamos a primeira revisão para AGORA, para que apareça imediatamente no Módulo 2.
+              next_review_at: new Date().toISOString(),
+            };
+          });
+
+        if (newCardsToInsert.length > 0) {
+          await supabase.from('card_progress').insert(newCardsToInsert);
+        }
+
+      } catch (e: any) {
+        console.error("Erro ao registar o progresso da lição:", e.message);
+      } finally {
+        setIsRegistering(false);
+      }
+    };
+
+    registerLessonCards();
+  }, [lang, lessonId]);
 
   useEffect(() => {
     if (lang) {
       const folderName = getLanguageFolderName(lang);
       const audio = new Audio(`/audio/narrations/${folderName}/aula_concluida.mp3`);
-      
-      // Quando o áudio terminar, a variável isAudioPlaying vira 'false'
-      audio.onended = () => {
-        setIsAudioPlaying(false);
-      };
-
-      // Tenta tocar o áudio
+      audio.onended = () => setIsAudioPlaying(false);
       audio.play().catch(error => {
         console.error("Erro ao tocar o áudio de conclusão:", error);
-        // Se der erro, libera o botão mesmo assim
-        setIsAudioPlaying(false); 
-      });
-
-    } else {
-        // Se não encontrar o idioma, libera o botão
         setIsAudioPlaying(false);
+      });
+    } else {
+      setIsAudioPlaying(false);
     }
   }, [lang]);
+
+  const isButtonDisabled = isAudioPlaying || isRegistering;
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 text-center">
@@ -52,13 +100,11 @@ const LessonCompletionPage: React.FC = () => {
         </p>
         <button
           onClick={() => navigate(`/${lang}/home`)}
-          // A propriedade 'disabled' usa o estado para se desativar/ativar
-          disabled={isAudioPlaying}
-          // As classes 'disabled:*' mudam a aparência do botão quando ele está desativado
+          disabled={isButtonDisabled}
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center mx-auto group transition-all duration-300 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
-          Ir para o Início
-          <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+          {isRegistering ? 'A guardar progresso...' : 'Ir para o Início'}
+          {!isRegistering && <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />}
         </button>
       </div>
     </div>

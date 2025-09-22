@@ -3,29 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Volume2, PlayCircle } from 'lucide-react';
 import { allLanguageData } from '../data/modules';
 
-// Função para salvar o progresso
-const saveProgress = (lang: string, lessonId: number) => {
-  const progressKey = `progress-${lang}`;
-  const currentProgress = JSON.parse(localStorage.getItem(progressKey) || '{"lastLessonCompleted": 0}');
-  if (lessonId > currentProgress.lastLessonCompleted) {
-    localStorage.setItem(progressKey, JSON.stringify({ lastLessonCompleted: lessonId }));
-  }
-};
-
-// Função para "traduzir" o código do idioma para o nome da pasta
+// Função para "traduzir" o código do idioma para o nome da pasta de áudio
 const getLanguageFolderName = (langCode: string): string => {
   const map: { [key: string]: string } = {
     en: 'ingles',
     jp: 'japones',
     kr: 'coreano',
     fr: 'frances',
-    es: 'espanhol',
-    pt: 'portugues',
-    de: 'alemao',
-    it: 'italiano',
-    cn: 'mandarim',
-    ru: 'russo',
-    tr: 'turco',
   };
   return map[langCode] || 'ingles';
 };
@@ -44,6 +28,7 @@ const LessonPage: React.FC = () => {
   const currentCard = cards[cardIndex];
   const isLastCard = cardIndex === cards.length - 1;
 
+  // Toca o áudio com pausas entre as repetições
   const playAudioWithPauses = (audioUrl: string, repetitions: number) => {
     if (!audioUrl) return;
     let playCount = 0;
@@ -52,7 +37,7 @@ const LessonPage: React.FC = () => {
     audio.onended = () => {
       playCount++;
       if (playCount < repetitions) {
-        setTimeout(playWithDelay, 1500);
+        setTimeout(playWithDelay, 1500); // Pausa de 1.5s
       }
     };
     playWithDelay();
@@ -62,10 +47,12 @@ const LessonPage: React.FC = () => {
     if (!lessonStarted || !currentCard) return;
     setShowNextButton(false);
     
+    // Evita tocar o áudio da narração e do primeiro card ao mesmo tempo
     if (!(lesson?.id === 1 && cardIndex === 0)) {
         playAudioWithPauses(currentCard.audioUrl, 3);
     }
 
+    // Mostra o botão "Próximo" após 7 segundos
     const timer = setTimeout(() => {
       setShowNextButton(true);
     }, 7000);
@@ -74,6 +61,7 @@ const LessonPage: React.FC = () => {
   }, [cardIndex, currentCard, lessonStarted, lesson]);
 
   const handleStartLesson = () => {
+    // Toca a narração introdutória apenas na primeira aula
     if (lesson?.id === 1 && cardIndex === 0 && lang) {
       const folderName = getLanguageFolderName(lang);
       const narrationAudio = new Audio(`/audio/narrations/${folderName}/aula1_intro.mp3`);
@@ -86,17 +74,15 @@ const LessonPage: React.FC = () => {
 
   const handleNext = () => {
     if (isLastCard) {
+      // Navega para a página de conclusão, passando o ID da lição na URL
       if (lang && lesson) {
-        saveProgress(lang, lesson.id);
+        navigate(`/${lang}/aula-concluida/${lesson.id}`);
       }
-      // --- MUDANÇA AQUI: Navega diretamente ---
-      navigate(`/${lang}/aula-concluida`);
     } else {
       setCardIndex(cardIndex + 1);
     }
   };
   
-  // ... (o resto do código continua igual)
   if (!cards || cards.length === 0) {
     return <div className="min-h-screen bg-black text-white p-8">Nenhum card encontrado para esta aula.</div>;
   }
@@ -104,6 +90,7 @@ const LessonPage: React.FC = () => {
   const formattedCurrentCard = String(cardIndex + 1).padStart(2, '0');
   const formattedTotalCards = String(cards.length).padStart(2, '0');
 
+  // Tela de início da aula
   if (!lessonStarted) {
     return (
       <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -119,6 +106,7 @@ const LessonPage: React.FC = () => {
     );
   }
 
+  // Tela principal da aula
   return (
     <div className="h-screen bg-black text-black flex flex-col items-center justify-center p-4 gap-3 overflow-hidden">
       <h2 className="text-2xl font-bold text-white text-center">
@@ -128,7 +116,7 @@ const LessonPage: React.FC = () => {
       <div className="w-full max-w-sm flex flex-col gap-3">
         <div className="flex justify-end">
           <span className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
-            {lessonStarted ? formattedCurrentCard : '--'}/{formattedTotalCards}
+            {formattedCurrentCard}/{formattedTotalCards}
           </span>
         </div>
 
@@ -143,7 +131,7 @@ const LessonPage: React.FC = () => {
           </div>
         </div>
 
-        <div className={`bg-white rounded-lg p-2 flex justify-center items-center h-64`}>
+        <div className="bg-white rounded-lg p-2 flex justify-center items-center h-64">
           <img src={currentCard.imageUrl} alt={currentCard.translation} className="max-w-full max-h-full object-contain" />
         </div>
 
@@ -151,7 +139,6 @@ const LessonPage: React.FC = () => {
           <button 
             onClick={() => playAudioWithPauses(currentCard.audioUrl, 1)} 
             className="bg-white rounded-lg py-3 flex justify-center items-center active:bg-gray-200"
-            disabled={!lessonStarted}
           >
             <Volume2 className="w-7 h-7" />
           </button>
@@ -169,6 +156,7 @@ const LessonPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Botões de feedback desativados */}
       <div className="w-full max-w-sm grid grid-cols-2 gap-4">
         <button className="bg-gray-700 opacity-50 cursor-not-allowed rounded-2xl h-20 flex justify-center items-center text-2xl font-bold" disabled>Não!</button>
         <button className="bg-gray-700 opacity-50 cursor-not-allowed rounded-2xl h-20 flex justify-center items-center text-2xl font-bold" disabled>Sim!</button>
