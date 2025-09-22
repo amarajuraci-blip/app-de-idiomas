@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Volume2, PlayCircle } from 'lucide-react';
 import { allLanguageData } from '../data/modules';
+import { saveLessonProgress } from '../utils/progress'; // Importamos a função para salvar no localStorage
 
-// Função para "traduzir" o código do idioma para o nome da pasta de áudio
+// Função para obter o nome da pasta de áudio correspondente ao idioma
 const getLanguageFolderName = (langCode: string): string => {
   const map: { [key: string]: string } = {
     en: 'ingles',
@@ -17,6 +18,7 @@ const getLanguageFolderName = (langCode: string): string => {
 const LessonPage: React.FC = () => {
   const navigate = useNavigate();
   const { lang, lessonId } = useParams<{ lang: string; lessonId: string }>();
+  
   const languageData = allLanguageData[lang || 'en'];
   const lesson = languageData.lessons.find(l => l.id.toString() === lessonId);
 
@@ -28,7 +30,7 @@ const LessonPage: React.FC = () => {
   const currentCard = cards[cardIndex];
   const isLastCard = cardIndex === cards.length - 1;
 
-  // Toca o áudio com pausas entre as repetições
+  // Função para tocar o áudio com repetições e pausas
   const playAudioWithPauses = (audioUrl: string, repetitions: number) => {
     if (!audioUrl) return;
     let playCount = 0;
@@ -37,22 +39,21 @@ const LessonPage: React.FC = () => {
     audio.onended = () => {
       playCount++;
       if (playCount < repetitions) {
-        setTimeout(playWithDelay, 1500); // Pausa de 1.5s
+        setTimeout(playWithDelay, 1500);
       }
     };
     playWithDelay();
   };
 
+  // Efeito para controlar a lógica de cada card
   useEffect(() => {
     if (!lessonStarted || !currentCard) return;
     setShowNextButton(false);
     
-    // Evita tocar o áudio da narração e do primeiro card ao mesmo tempo
     if (!(lesson?.id === 1 && cardIndex === 0)) {
         playAudioWithPauses(currentCard.audioUrl, 3);
     }
 
-    // Mostra o botão "Próximo" após 7 segundos
     const timer = setTimeout(() => {
       setShowNextButton(true);
     }, 7000);
@@ -60,8 +61,8 @@ const LessonPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [cardIndex, currentCard, lessonStarted, lesson]);
 
+  // Função para iniciar a lição
   const handleStartLesson = () => {
-    // Toca a narração introdutória apenas na primeira aula
     if (lesson?.id === 1 && cardIndex === 0 && lang) {
       const folderName = getLanguageFolderName(lang);
       const narrationAudio = new Audio(`/audio/narrations/${folderName}/aula1_intro.mp3`);
@@ -72,11 +73,16 @@ const LessonPage: React.FC = () => {
     setLessonStarted(true);
   };
 
+  // Função para avançar ou concluir a lição
   const handleNext = () => {
     if (isLastCard) {
-      // Navega para a página de conclusão, passando o ID da lição na URL
       if (lang && lesson) {
-        navigate(`/${lang}/aula-concluida/${lesson.id}`);
+        // AQUI ESTÁ A LÓGICA CHAVE:
+        // 1. Salva o ID da lição concluída no localStorage do navegador.
+        saveLessonProgress(lang, lesson.id);
+        
+        // 2. Navega para a página de conclusão (sem precisar de back-end).
+        navigate(`/${lang}/aula-concluida`);
       }
     } else {
       setCardIndex(cardIndex + 1);
@@ -90,7 +96,7 @@ const LessonPage: React.FC = () => {
   const formattedCurrentCard = String(cardIndex + 1).padStart(2, '0');
   const formattedTotalCards = String(cards.length).padStart(2, '0');
 
-  // Tela de início da aula
+  // Ecrã de "Começar Aula"
   if (!lessonStarted) {
     return (
       <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -106,7 +112,7 @@ const LessonPage: React.FC = () => {
     );
   }
 
-  // Tela principal da aula
+  // Ecrã principal da lição
   return (
     <div className="h-screen bg-black text-black flex flex-col items-center justify-center p-4 gap-3 overflow-hidden">
       <h2 className="text-2xl font-bold text-white text-center">
@@ -156,7 +162,6 @@ const LessonPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Botões de feedback desativados */}
       <div className="w-full max-w-sm grid grid-cols-2 gap-4">
         <button className="bg-gray-700 opacity-50 cursor-not-allowed rounded-2xl h-20 flex justify-center items-center text-2xl font-bold" disabled>Não!</button>
         <button className="bg-gray-700 opacity-50 cursor-not-allowed rounded-2xl h-20 flex justify-center items-center text-2xl font-bold" disabled>Sim!</button>

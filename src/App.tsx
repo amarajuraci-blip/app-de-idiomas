@@ -3,7 +3,6 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 
 import LoginPage from './components/LoginPage';
-// O RegisterPage foi removido
 import ProtectedRoute from './components/ProtectedRoute';
 import LanguageSelectionPage from './components/LanguageSelectionPage';
 import HomePage from './components/HomePage';
@@ -20,7 +19,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Rotas Públicas */}
+        {/* Rota Pública */}
         <Route path="/" element={<LoginPage />} />
         
         {/* Rotas Protegidas */}
@@ -38,11 +37,11 @@ function App() {
         <Route path="/:lang/modulo/4" element={<ProtectedRoute><Module4Page /></ProtectedRoute>} />
         <Route path="/:lang/modulo/5" element={<ProtectedRoute><Module5Page /></ProtectedRoute>} />
 
-        {/* Rota para a tela de conclusão */}
-        <Route
-  path="/:lang/aula-concluida/:lessonId" // <-- Adicionámos /:lessonId
-  element={<ProtectedRoute><LessonCompletionPage /></ProtectedRoute>}
-/>
+        {/* Rota de conclusão SIMPLES */}
+        <Route 
+          path="/:lang/aula-concluida" 
+          element={<ProtectedRoute><LessonCompletionPage /></ProtectedRoute>} 
+        />
       </Routes>
     </Router>
   );
