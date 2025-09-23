@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // O Link foi removido
-import { supabase } from '../supabaseClient'; // Importa a nossa ligação ao Supabase
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +14,17 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    // Lógica de login com o Supabase
+    // Lógica de senha única para convidados
+    if (password === 'senha-convidado') {
+      localStorage.setItem('isGuest', 'true');
+      navigate('/selecao-idioma', { replace: true });
+      setIsLoading(false);
+      return;
+    }
+
+    localStorage.removeItem('isGuest'); // Garante que não é um convidado
+
+    // Lógica de login com o Supabase para usuários registrados
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
@@ -32,7 +42,7 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
-          <img 
+          <img
             src="https://i.imgur.com/ru9WoNh.jpg"
             alt="Logo do Curso"
             className="w-full max-w-sm mx-auto rounded-lg shadow-2xl"
@@ -89,8 +99,6 @@ const LoginPage: React.FC = () => {
               {isLoading ? 'A entrar...' : 'Entrar'}
             </button>
           </form>
-
-          {/* O link para a página de registo foi removido daqui */}
         </div>
       </div>
     </div>

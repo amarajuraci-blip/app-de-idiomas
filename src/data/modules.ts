@@ -57,47 +57,47 @@ const englishData: LanguageData = {
     },
     {
       id: 2,
-      title: "Aula 02: Transportes e a Cidade",
+      title: "Aula 02: Animais da Quinta",
       thumbnailUrl: "https://i.postimg.cc/tCNk0vjW/aula2-thumb.png", // SUBSTITUA PELA SUA THUMBNAIL
       cards: [
-        { id: 113, portuguese: 'Carro', translation: 'Car', imageUrl: '/images/aula2/car.webp', audioUrl: '/audio/ingles/aula2/car.mp3' },
-        { id: 114, portuguese: 'Ônibus', translation: 'Bus', imageUrl: '/images/aula2/bus.webp', audioUrl: '/audio/ingles/aula2/bus.mp3' },
-        { id: 115, portuguese: 'Trem', translation: 'Train', imageUrl: '/images/aula2/train.webp', audioUrl: '/audio/ingles/aula2/train.mp3' },
-        { id: 116, portuguese: 'Avião', translation: 'Airplane', imageUrl: '/images/aula2/airplane.webp', audioUrl: '/audio/ingles/aula2/airplane.mp3' },
-        { id: 117, portuguese: 'Barco', translation: 'Boat', imageUrl: '/images/aula2/boat.webp', audioUrl: '/audio/ingles/aula2/boat.mp3' },
-        { id: 118, portuguese: 'Rua', translation: 'Street', imageUrl: '/images/aula2/street.webp', audioUrl: '/audio/ingles/aula2/street.mp3' },
-        { id: 119, portuguese: 'Cidade', translation: 'City', imageUrl: '/images/aula2/city.webp', audioUrl: '/audio/ingles/aula2/city.mp3' },
-        { id: 120, portuguese: 'Prédio', translation: 'Building', imageUrl: '/images/aula2/building.webp', audioUrl: '/audio/ingles/aula2/building.mp3' },
-        { id: 121, portuguese: 'Ponte', translation: 'Bridge', imageUrl: '/images/aula2/bridge.webp', audioUrl: '/audio/ingles/aula2/bridge.mp3' },
-        { id: 122, portuguese: 'Semáforo', translation: 'Traffic Light', imageUrl: '/images/aula2/traffic-light.webp', audioUrl: '/audio/ingles/aula2/traffic-light.mp3' },
-        { id: 123, portuguese: 'Placa', translation: 'Sign', imageUrl: '/images/aula2/sign.webp', audioUrl: '/audio/ingles/aula2/sign.mp3' },
-        { id: 124, portuguese: 'Mapa', translation: 'Map', imageUrl: '/images/aula2/map.webp', audioUrl: '/audio/ingles/aula2/map.mp3' }
+        { id: 113, portuguese: 'Periquito', translation: 'Budgie', imageUrl: '/images/aula2/budgie.webp', audioUrl: '/audio/ingles/aula2/budgie.mp3' },
+        { id: 114, portuguese: 'Touro', translation: 'Bull', imageUrl: '/images/aula2/bull.webp', audioUrl: '/audio/ingles/aula2/bull.mp3' },
+        { id: 115, portuguese: 'Gato', translation: 'Cat', imageUrl: '/images/aula2/cat.webp', audioUrl: '/audio/ingles/aula2/cat.mp3' },
+        { id: 116, portuguese: 'Galinha', translation: 'Chicken', imageUrl: '/images/aula2/chicken.webp', audioUrl: '/audio/ingles/aula2/chicken.mp3' },
+        { id: 117, portuguese: 'Vaca', translation: 'Cow', imageUrl: '/images/aula2/cow.webp', audioUrl: '/audio/ingles/aula2/cow.mp3' },
+        { id: 118, portuguese: 'Pato', translation: 'Duck', imageUrl: '/images/aula2/duck.webp', audioUrl: '/audio/ingles/aula2/duck.mp3' },
+        { id: 119, portuguese: 'Peixe', translation: 'Fish', imageUrl: '/images/aula2/fish.webp', audioUrl: '/audio/ingles/aula2/fish.mp3' },
+        { id: 120, portuguese: 'Cabra', translation: 'Goat', imageUrl: '/images/aula2/goat.webp', audioUrl: '/audio/ingles/aula2/goat.mp3' },
+        { id: 121, portuguese: 'Cavalo', translation: 'Horse', imageUrl: '/images/aula2/horse.webp', audioUrl: '/audio/ingles/aula2/horse.mp3' },
+        { id: 122, portuguese: 'Porco', translation: 'Pig', imageUrl: '/images/aula2/pig.webp', audioUrl: '/audio/ingles/aula2/pig.mp3' },
+        { id: 123, portuguese: 'Coelho', translation: 'Rabbit', imageUrl: '/images/aula2/rabbit.webp', audioUrl: '/audio/ingles/aula2/rabbit.mp3' },
+        { id: 124, portuguese: 'Ovelha', translation: 'Sheep', imageUrl: '/images/aula2/sheep.webp', audioUrl: '/audio/ingles/aula2/sheep.mp3' }
       ]
     },
     {
       id: 3,
-      title: "Aula 03: Comidas e Animais",
+      title: "Aula 03: Frutas",
       thumbnailUrl: "https://i.postimg.cc/PqYg4z8T/aula3-thumb.png", // SUBSTITUA PELA SUA THUMBNAIL
       cards: [
         { id: 125, portuguese: 'Maçã', translation: 'Apple', imageUrl: '/images/aula3/apple.webp', audioUrl: '/audio/ingles/aula3/apple.mp3' },
-        { id: 126, portuguese: 'Banana', translation: 'Banana', imageUrl: '/images/aula3/banana.webp', audioUrl: '/audio/ingles/aula3/banana.mp3' },
-        { id: 127, portuguese: 'Pão', translation: 'Bread', imageUrl: '/images/aula3/bread.webp', audioUrl: '/audio/ingles/aula3/bread.mp3' },
-        { id: 128, portuguese: 'Leite', translation: 'Milk', imageUrl: '/images/aula3/milk.webp', audioUrl: '/audio/ingles/aula3/milk.mp3' },
-        { id: 129, portuguese: 'Água', translation: 'Water', imageUrl: '/images/aula3/water.webp', audioUrl: '/audio/ingles/aula3/water.mp3' },
-        { id: 130, portuguese: 'Queijo', translation: 'Cheese', imageUrl: '/images/aula3/cheese.webp', audioUrl: '/audio/ingles/aula3/cheese.mp3' },
-        { id: 131, portuguese: 'Gato', translation: 'Cat', imageUrl: '/images/aula3/cat.webp', audioUrl: '/audio/ingles/aula3/cat.mp3' },
-        { id: 132, portuguese: 'Cavalo', translation: 'Horse', imageUrl: '/images/aula3/horse.webp', audioUrl: '/audio/ingles/aula3/horse.mp3' },
-        { id: 133, portuguese: 'Pássaro', translation: 'Bird', imageUrl: '/images/aula3/bird.webp', audioUrl: '/audio/ingles/aula3/bird.mp3' },
-        { id: 134, portuguese: 'Peixe', translation: 'Fish', imageUrl: '/images/aula3/fish.webp', audioUrl: '/audio/ingles/aula3/fish.mp3' },
-        { id: 135, portuguese: 'Vaca', translation: 'Cow', imageUrl: '/images/aula3/cow.webp', audioUrl: '/audio/ingles/aula3/cow.mp3' },
-        { id: 136, portuguese: 'Ovelha', translation: 'Sheep', imageUrl: '/images/aula3/sheep.webp', audioUrl: '/audio/ingles/aula3/sheep.mp3' }
+        { id: 126, portuguese: 'Abacate', translation: 'Avocado', imageUrl: '/images/aula3/avocado.webp', audioUrl: '/audio/ingles/aula3/avocado.mp3' },
+        { id: 127, portuguese: 'Coco', translation: 'Coconut', imageUrl: '/images/aula3/coconut.webp', audioUrl: '/audio/ingles/aula3/coconut.mp3' },
+        { id: 128, portuguese: 'Uva', translation: 'Grape', imageUrl: '/images/aula3/grape.webp', audioUrl: '/audio/ingles/aula3/grape.mp3' },
+        { id: 129, portuguese: 'Jaca', translation: 'Jackfruit', imageUrl: '/images/aula3/jackfruit.webp', audioUrl: '/audio/ingles/aula3/jackfruit.mp3' },
+        { id: 130, portuguese: 'Laranja', translation: 'Orange', imageUrl: '/images/aula3/orange.webp', audioUrl: '/audio/ingles/aula3/orange.mp3' },
+        { id: 131, portuguese: 'Abacaxi', translation: 'Pineapple', imageUrl: '/images/aula3/pineapple.webp', audioUrl: '/audio/ingles/aula3/pineapple.mp3' },
+        { id: 132, portuguese: 'Ameixa', translation: 'Plum', imageUrl: '/images/aula3/plum.webp', audioUrl: '/audio/ingles/aula3/plum.mp3' },
+        { id: 133, portuguese: 'Graviola', translation: 'Soursop', imageUrl: '/images/aula3/soursop.webp', audioUrl: '/audio/ingles/aula3/soursop.mp3' },
+        { id: 134, portuguese: 'Carambola', translation: 'Starfruit', imageUrl: '/images/aula3/starfruit.webp', audioUrl: '/audio/ingles/aula3/starfruit.mp3' },
+        { id: 135, portuguese: 'Morango', translation: 'Strawberry', imageUrl: '/images/aula3/strawberry.webp', audioUrl: '/audio/ingles/aula3/strawberry.mp3' },
+        { id: 136, portuguese: 'Melancia', translation: 'Watermelon', imageUrl: '/images/aula3/watermelon.webp', audioUrl: '/audio/ingles/aula3/watermelon.mp3' }
       ]
     },
   ]
 };
 
 // ========================================================================
-// --- DADOS EM OUTROS IDIOMAS (Estrutura pronta para ser preenchida) ---
+// --- DADOS EM OUTROS IDIOMAS ---
 // ========================================================================
 const japaneseData: LanguageData = { homePageModules: englishData.homePageModules, lessons: [] };
 const koreanData: LanguageData = { homePageModules: englishData.homePageModules, lessons: [] };
