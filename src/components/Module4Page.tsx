@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react'; // <-- 'useEffect' foi removido daqui
 import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
+import { completeFirstReview } from '../utils/progress';
 
 const Module4Page: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
-  
-  // --- LÓGICA PRINCIPAL ATUALIZADA ---
-  const reviewCards = useReviewCards(); // <-- USA O NOSSO "CÉREBRO"
-  // ------------------------------------
+
+  const reviewCards = useReviewCards();
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -31,8 +30,12 @@ const Module4Page: React.FC = () => {
 
   const handleFeedback = (feedback: 'yes' | 'no') => {
     if (isProcessing) return;
-    setIsProcessing(true);
 
+    if (feedback === 'yes' && lang) {
+        completeFirstReview(lang, 4);
+    }
+
+    setIsProcessing(true);
     setImageFlashClass(feedback === 'yes' ? 'flash-image-green' : 'flash-image-red');
 
     setTimeout(() => {
@@ -54,7 +57,7 @@ const Module4Page: React.FC = () => {
       <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
           <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para revisar!</h2>
           <p className="text-center text-gray-400 mb-6">Complete algumas aulas no Módulo 1 para liberar as revisões.</p>
-          <button 
+          <button
               onClick={() => navigate(`/${lang}/home`)}
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
           >
@@ -106,7 +109,7 @@ const Module4Page: React.FC = () => {
 
         <div className="h-12 flex items-center justify-center">
           {!isRevealed ? (
-             <button 
+             <button
               onClick={handleReveal}
               className="bg-white rounded-lg w-full h-full font-bold text-base text-black active:bg-gray-200"
             >
@@ -118,14 +121,14 @@ const Module4Page: React.FC = () => {
         </div>
 
         <div className="w-full grid grid-cols-2 gap-4">
-          <button 
+          <button
             onClick={() => handleFeedback('no')}
             disabled={!isRevealed || isProcessing}
             className={`rounded-2xl h-20 flex justify-center items-center transition-opacity text-2xl font-bold disabled:cursor-not-allowed ${isRevealed ? 'bg-red-600 active:bg-red-700' : 'bg-gray-700 opacity-50'}`}
           >
             Não!
           </button>
-          <button 
+          <button
             onClick={() => handleFeedback('yes')}
             disabled={!isRevealed || isProcessing}
             className={`rounded-2xl h-20 flex justify-center items-center transition-opacity text-2xl font-bold disabled:cursor-not-allowed ${isRevealed ? 'bg-green-600 active:bg-green-700' : 'bg-gray-700 opacity-50'}`}

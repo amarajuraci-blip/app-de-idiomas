@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -16,56 +16,47 @@ const getLanguageFolderName = (langCode: string): string => {
 
 const LessonCompletionPage: React.FC = () => {
   const navigate = useNavigate();
-  // Obtém o 'lang' e o 'lessonId' diretamente dos parâmetros da URL
   const { lang, lessonId: lessonIdStr } = useParams<{ lang: string; lessonId: string }>();
   const lessonId = parseInt(lessonIdStr || '0', 10);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(true);
-  const [isRegistering, setIsRegistering] = useState(true); // Controla o estado de gravação no Supabase
+  const [isRegistering, setIsRegistering] = useState(true);
+  const audioPlayedRef = useRef(false);
 
   useEffect(() => {
-    // Função assíncrona para registar os cards da lição
     const registerLessonCards = async () => {
       if (!lang || !lessonId) {
         setIsRegistering(false);
         return;
       }
-
       try {
-        // 1. Obter a sessão do utilizador atual
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error('Utilizador não autenticado.');
         const user = session.user;
 
-        // 2. Encontrar os cards da lição específica que foi concluída
         const lesson = allLanguageData[lang]?.lessons.find(l => l.id === lessonId);
         if (!lesson) throw new Error('Lição não encontrada.');
         const lessonCards = lesson.cards;
 
-        // 3. Verificar quais cards desta lição já existem na base de dados para este utilizador
         const { data: existingProgress } = await supabase
           .from('card_progress')
           .select('card_id')
           .eq('user_id', user.id)
           .in('card_id', lessonCards.map(c => c.id));
 
-        // 4. Criar um conjunto (Set) com os IDs dos cards existentes para uma verificação rápida
         const existingCardIds = new Set((existingProgress || []).map(p => p.card_id));
         
-        // 5. Filtrar e mapear apenas os cards que são genuinamente novos para este utilizador
         const newCardsToInsert = lessonCards
           .filter(card => !existingCardIds.has(card.id))
           .map(card => {
             return {
               user_id: user.id,
               card_id: card.id,
-              srs_level: 0, // Nível inicial
-              // Define a primeira revisão para a data/hora atual, tornando-os imediatamente disponíveis
+              srs_level: 0,
               next_review_at: new Date().toISOString(),
             };
           });
 
-        // 6. Se existirem novos cards para inserir, faz a inserção no Supabase
         if (newCardsToInsert.length > 0) {
           const { error: insertError } = await supabase.from('card_progress').insert(newCardsToInsert);
           if (insertError) throw insertError;
@@ -74,7 +65,6 @@ const LessonCompletionPage: React.FC = () => {
       } catch (e: any) {
         console.error("Erro ao registar o progresso da lição:", e.message);
       } finally {
-        // Independentemente do resultado, termina o estado de registo
         setIsRegistering(false);
       }
     };
@@ -82,22 +72,34 @@ const LessonCompletionPage: React.FC = () => {
     registerLessonCards();
   }, [lang, lessonId]);
 
-  // useEffect para tocar o áudio de conclusão
   useEffect(() => {
+    // Se a referência já estiver marcada como 'true', significa que o áudio
+    // já foi iniciado, então saímos para evitar qualquer lógica duplicada.
+    if (audioPlayedRef.current) {
+      return;
+    }
+
     if (lang) {
+      // Marcamos que vamos iniciar o áudio.
+      audioPlayedRef.current = true;
+      
       const folderName = getLanguageFolderName(lang);
       const audio = new Audio(`/audio/narrations/${folderName}/aula_concluida.mp3`);
+      
+      // O botão só será liberado quando o áudio terminar.
       audio.onended = () => setIsAudioPlaying(false);
+      
       audio.play().catch(error => {
         console.error("Erro ao tocar o áudio de conclusão:", error);
-        setIsAudioPlaying(false); // Libera o botão mesmo se houver erro no áudio
+        // Se der erro, também liberamos o botão.
+        setIsAudioPlaying(false);
       });
     } else {
+      // Se não houver 'lang', não há áudio para tocar, então liberamos o botão.
       setIsAudioPlaying(false);
     }
   }, [lang]);
 
-  // O botão fica desativado enquanto o áudio estiver a tocar OU os dados estiverem a ser guardados
   const isButtonDisabled = isAudioPlaying || isRegistering;
 
   return (

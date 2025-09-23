@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useReviewCards } from '../hooks/useReviewCards'; // Usa o hook simples que lê do localStorage
+import { useReviewCards } from '../hooks/useReviewCards';
+import { completeFirstReview } from '../utils/progress'; // <-- Adicionada importação
 
 // Função para embaralhar um array (algoritmo Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -16,7 +17,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 const Module2Page: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
-  
+
   // Obtém os cards para revisão a partir do progresso guardado localmente
   const reviewCards = useReviewCards();
 
@@ -43,7 +44,7 @@ const Module2Page: React.FC = () => {
     const correctCard = cards[index];
     const wrongAnswers = shuffleArray(cards.filter(card => card.id !== correctCard.id)).slice(0, 4);
     const optionsText = shuffleArray([correctCard, ...wrongAnswers]);
-    
+
     const questionData = {
       imageUrl: correctCard.imageUrl,
       options: optionsText.map((opt: any, i: number) => ({
@@ -54,11 +55,17 @@ const Module2Page: React.FC = () => {
     };
     setCurrentQuestion(questionData);
   };
-  
+
   const handleAnswerClick = (selectedText: string, event: React.MouseEvent<HTMLButtonElement>) => {
     if (isProcessing) return;
 
     const isCorrect = selectedText === currentQuestion?.correctAnswer;
+
+    // Se a resposta estiver correta, chama a função para desbloquear o próximo módulo
+    if (isCorrect && lang) {
+      completeFirstReview(lang, 2); // Marca a revisão do Módulo 2 como feita
+    }
+
     setIsProcessing(true);
     setSelectedAnswer({ text: selectedText, isCorrect });
     setImageFlashClass(isCorrect ? 'flash-image-green' : 'flash-image-red');
@@ -73,18 +80,18 @@ const Module2Page: React.FC = () => {
       setIsProcessing(false);
     }, 2000);
   };
-  
+
   // Função para definir a cor da borda das opções com base na resposta
   const getOptionClass = (optionText: string) => {
     if (!selectedAnswer) return 'border-gray-700';
-    
+
     const { text: selectedText, isCorrect } = selectedAnswer;
     const isThisOptionCorrect = optionText === currentQuestion.correctAnswer;
     const isThisOptionSelected = optionText === selectedText;
 
-    if (!isCorrect && isThisOptionSelected) return 'wrong-answer-border'; 
-    if (isThisOptionCorrect) return 'correct-answer-border'; 
-    
+    if (!isCorrect && isThisOptionSelected) return 'wrong-answer-border';
+    if (isThisOptionCorrect) return 'correct-answer-border';
+
     return 'border-gray-700 opacity-50';
   };
 
@@ -96,14 +103,14 @@ const Module2Page: React.FC = () => {
   if (reviewCards.length > 0 && !currentQuestion) {
     return <div className="h-screen bg-black text-white flex items-center justify-center">A carregar revisão...</div>;
   }
-  
+
   // Ecrã de "Nenhum card para rever"
   if (reviewCards.length === 0) {
       return (
         <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
             <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para rever!</h2>
             <p className="text-center text-gray-400 mb-6">Complete algumas aulas no Módulo 1 para liberar as revisões.</p>
-            <button 
+            <button
                 onClick={() => navigate(`/${lang}/home`)}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
             >
@@ -116,7 +123,7 @@ const Module2Page: React.FC = () => {
   return (
     <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
       <div className="w-full max-w-sm">
-        <button 
+        <button
           onClick={() => navigate(`/${lang}/home`)}
           className="absolute top-4 left-4 flex items-center text-white hover:text-purple-400 transition-colors duration-300 text-lg group z-10"
         >
@@ -138,7 +145,7 @@ const Module2Page: React.FC = () => {
         </div>
         <div className="flex flex-col gap-2">
           {currentQuestion.options.map((option: any) => (
-            <button 
+            <button
               key={option.letter}
               onClick={(e) => handleAnswerClick(option.text, e)}
               disabled={isProcessing}

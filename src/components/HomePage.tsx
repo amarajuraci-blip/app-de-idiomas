@@ -4,39 +4,35 @@ import { LogOut } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
+import { getProgress } from '../utils/progress'; // <-- Importamos nosso utilitário
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
 
   const languageData = allLanguageData[lang || 'en'];
+  const progress = getProgress(lang || 'en'); // <-- Lemos o progresso do aluno
 
-  const handleModuleClick = (moduleId: number, section: number) => {
-    if (section === 1) {
-      if (moduleId === 1) {
-        navigate(`/${lang}/modulo/1`);
-      } else if (moduleId === 2) {
-        navigate(`/${lang}/modulo/2`);
-      } else if (moduleId === 3) {
-        navigate(`/${lang}/modulo/3`);
-      } else if (moduleId === 4) {
-        navigate(`/${lang}/modulo/4`);
-      } else if (moduleId === 5) { // <-- MUDANÇA AQUI
-        navigate(`/${lang}/modulo/5`);
-      } else {
-        alert(`Módulo ${moduleId} em desenvolvimento!`);
-      }
-    } else {
-      alert(`Módulo ${moduleId} da Seção ${section} em desenvolvimento!`);
+  const handleModuleClick = (moduleId: number) => {
+    const isUnlocked = progress.unlockedModules.includes(moduleId);
+
+    if (!isUnlocked) {
+      alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
+      return;
     }
+
+    // Navegação padrão se o módulo estiver desbloqueado
+    const path = `/${lang}/modulo/${moduleId}`;
+    navigate(path);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+    // Limpa o progresso de convidado e a sessão do Supabase
+    localStorage.removeItem('isGuest');
+    localStorage.removeItem(`progress-${lang}`);
     navigate('/', { replace: true });
   };
 
-  // O resto do código continua igual...
   return (
     <div className="min-h-screen bg-black pb-20">
       <div className="absolute top-4 right-4 z-50">
@@ -68,19 +64,23 @@ const HomePage: React.FC = () => {
             <span className="text-blue-400">♦</span> Módulos Principais <span className="text-blue-400">♦</span>
           </SectionTitle>
           <ModuleCarousel
-            modules={languageData.homePageModules.main}
+            modules={languageData.homePageModules.main.map(module => ({
+              ...module,
+              isLocked: !progress.unlockedModules.includes(module.id) // <-- Adicionamos o estado de bloqueio
+            }))}
             sectionType="course"
-            onModuleClick={(moduleId) => handleModuleClick(moduleId, 1)}
+            onModuleClick={handleModuleClick}
           />
         </section>
         <section className="mb-12 md:mb-20">
           <SectionTitle>
             <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
           </SectionTitle>
+           {/* Módulos avançados podem ter sua própria lógica de bloqueio se necessário */}
           <ModuleCarousel
             modules={languageData.homePageModules.advanced}
             sectionType="howto"
-            onModuleClick={(moduleId) => handleModuleClick(moduleId, 2)}
+            onModuleClick={(moduleId) => alert(`Módulo ${moduleId} em desenvolvimento!`)}
           />
         </section>
       </div>

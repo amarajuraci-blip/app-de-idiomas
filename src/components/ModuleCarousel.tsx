@@ -1,10 +1,12 @@
 import React, { useRef } from 'react';
 import ModuleCard from './ModuleCard';
 
+// A interface foi atualizada para incluir a nova propriedade opcional 'isLocked'
 interface Module {
   id: number;
   title: string;
   imageUrl: string;
+  isLocked?: boolean; 
 }
 
 interface ModuleCarouselProps {
@@ -70,6 +72,7 @@ const ModuleCarousel: React.FC<ModuleCarouselProps> = ({ modules, sectionType, o
                 title={module.title}
                 imageUrl={module.imageUrl}
                 sectionType={sectionType}
+                isLocked={module.isLocked} // <-- Passa a informação de bloqueio para o ModuleCard
               />
             </div>
           ))}
