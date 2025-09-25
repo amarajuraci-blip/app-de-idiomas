@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Volume2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
-import { completeFirstReview } from '../utils/progress';
+import { completeFirstReview, getProgress, markModule3IntroAsPlayed } from '../utils/progress';
+import { playAudioOnce } from '../utils/audioPlayer';
 
 interface Card {
   id: number;
@@ -29,7 +30,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 const Module3Page: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
-
+  
   const reviewCards = useReviewCards();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -37,6 +38,19 @@ const Module3Page: React.FC = () => {
   const [showResult, setShowResult] = useState(false);
   const [flashClass, setFlashClass] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isIntroAudioPlaying, setIsIntroAudioPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!lang) return;
+    const progress = getProgress(lang);
+    if (!progress.hasPlayedModule3Intro) {
+        setIsIntroAudioPlaying(true);
+        playAudioOnce('module3_intro', '/audio/narrations/ingles/audio_07.mp3');
+        markModule3IntroAsPlayed(lang);
+        setTimeout(() => setIsIntroAudioPlaying(false), 8000);
+    }
+  }, [lang]);
+
 
   useEffect(() => {
     if (reviewCards.length > 0) {
@@ -47,14 +61,13 @@ const Module3Page: React.FC = () => {
   const generateQuestion = (cards: Card[], index: number) => {
     if (cards.length === 0) return;
     if (index >= cards.length) {
-      alert("Revisão concluída!");
-      navigate(`/${lang}/home`);
+      navigate(`/${lang}/modulo/3/concluido`);
       return;
     }
     const correctCard = cards[index];
     const wrongAnswers = shuffleArray(cards.filter(card => card.id !== correctCard.id)).slice(0, 3);
     const options = shuffleArray([correctCard, ...wrongAnswers]);
-
+    
     setCurrentQuestion({
       audioUrl: correctCard.audioUrl,
       options: options.map(card => ({ id: card.id, imageUrl: card.imageUrl })),
@@ -68,7 +81,7 @@ const Module3Page: React.FC = () => {
   };
 
   const handleAnswerClick = (selectedId: number) => {
-    if (isProcessing || !currentQuestion) return; // <-- Verificação de segurança
+    if (isProcessing || isIntroAudioPlaying || !currentQuestion) return;
 
     setIsProcessing(true);
     const isCorrect = selectedId === currentQuestion.correctAnswer.id;
@@ -76,7 +89,7 @@ const Module3Page: React.FC = () => {
     if (isCorrect && lang) {
       completeFirstReview(lang, 3);
     }
-
+    
     setFlashClass(isCorrect ? 'flash-image-green' : 'flash-image-red');
     setShowResult(true);
 
@@ -89,23 +102,23 @@ const Module3Page: React.FC = () => {
       setIsProcessing(false);
     }, 3000);
   };
-
+  
   if (reviewCards.length === 0) {
     return (
       <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-          <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para revisar!</h2>
-          <p className="text-center text-gray-400 mb-6">Complete algumas aulas no Módulo 1 para liberar as revisões.</p>
-          <button
-              onClick={() => navigate(`/${lang}/home`)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-          >
-              Voltar
-          </button>
+        <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para revisar!</h2>
+        <p className="text-center text-gray-400 mb-6">Complete o Módulo 2 para liberar as revisões.</p>
+        <button 
+          onClick={() => navigate(`/${lang}/home`)}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Voltar
+        </button>
       </div>
-    )
+    );
   }
 
-  // <-- CORREÇÃO PRINCIPAL AQUI -->
+  // --- CORREÇÃO AQUI ---
   // Se ainda não temos uma pergunta carregada, mostramos a mensagem de carregamento.
   // Isto garante ao TypeScript que, se o código continuar, 'currentQuestion' não é mais nulo.
   if (!currentQuestion) {
@@ -129,7 +142,6 @@ const Module3Page: React.FC = () => {
             </span>
           </div>
         </div>
-
         <div className={`bg-white rounded-lg p-2 flex justify-center items-center h-64 mb-4 transition-all duration-300 ${flashClass}`}>
           {showResult ? (
             <img src={currentQuestion.correctAnswer.imageUrl} alt={currentQuestion.correctAnswer.translation} className="max-w-full max-h-full object-contain" />
@@ -139,13 +151,12 @@ const Module3Page: React.FC = () => {
             </button>
           )}
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           {currentQuestion.options.map((option) => (
-            <button
+            <button 
               key={option.id}
               onClick={() => handleAnswerClick(option.id)}
-              disabled={isProcessing}
+              disabled={isProcessing || isIntroAudioPlaying}
               className="bg-white rounded-lg p-2 aspect-square flex items-center justify-center hover:scale-105 transition-transform disabled:cursor-not-allowed disabled:opacity-70"
             >
               <img src={option.imageUrl} alt="Opção de resposta" className="max-w-full max-h-full object-contain" />

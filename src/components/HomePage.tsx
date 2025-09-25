@@ -1,42 +1,68 @@
-import React, { useEffect, useState } from 'react'; // Importar useState
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
-import { getProgress, markIntroAsPlayed, Progress } from '../utils/progress'; // Importar o tipo 'Progress'
+import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed } from '../utils/progress';
+import { playAudioOnce } from '../utils/audioPlayer';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
 
-  // Usamos o estado para gerir o progresso, lendo do localStorage uma vez na inicialização
-  const [progress, setProgress] = useState<Progress>(() => getProgress(lang || 'en'));
-
-  const languageData = allLanguageData[lang || 'en'];
-
+  const progress = getProgress(lang || 'en');
+  
+  // Estados para controlar os bloqueios temporários dos áudios
+  const [isModule1AudioLocked, setIsModule1AudioLocked] = useState(false);
+  const [isModule2AudioLocked, setIsModule2AudioLocked] = useState(false);
+  const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
+  
   useEffect(() => {
     if (!lang) return;
-    
-    // Agora verificamos o nosso estado interno, que é mais fiável
-    if (!progress.hasPlayedIntro) {
-      const introAudio = new Audio(`/audio/narrations/ingles/audio_01.mp3`);
-      introAudio.play();
-      
-      // Atualizamos o localStorage
-      markIntroAsPlayed(lang);
-      // E também atualizamos o nosso estado interno para refletir a mudança imediatamente
-      setProgress(currentProgress => ({ ...currentProgress, hasPlayedIntro: true }));
+    const currentProgress = getProgress(lang);
+
+    // Lógica do audio_01 (14 segundos)
+    if (!currentProgress.hasPlayedIntro) {
+      setIsModule1AudioLocked(true);
+      playAudioOnce('main_intro', '/audio/narrations/ingles/audio_01.mp3');
+      setTimeout(() => setIsModule1AudioLocked(false), 14000);
     }
-  }, [lang, progress.hasPlayedIntro]); // O efeito depende do estado 'hasPlayedIntro'
+
+    // Lógica do audio_03 (10 segundos)
+    if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
+      setIsModule2AudioLocked(true);
+      playAudioOnce('audio_03', '/audio/narrations/ingles/audio_03.mp3');
+      setTimeout(() => setIsModule2AudioLocked(false), 10000);
+    }
+
+    // Lógica para o audio_06 (6 segundos)
+    // Condição: O aluno completou a primeira revisão do Módulo 2
+    if (currentProgress.completedReviews[2] && !currentProgress.hasPlayedAudio06) {
+      setIsModule3AudioLocked(true); // Bloqueia o Módulo 3
+      playAudioOnce('audio_06', '/audio/narrations/ingles/audio_06.mp3');
+      setTimeout(() => setIsModule3AudioLocked(false), 6000); // Desbloqueia após 6 segundos
+    }
+
+  }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
+    // Verifica todos os bloqueios temporários
+    if (moduleId === 1 && isModule1AudioLocked) return;
+    if (moduleId === 2 && isModule2AudioLocked) return;
+    if (moduleId === 3 && isModule3AudioLocked) return;
+    
     const isUnlocked = progress.unlockedModules.includes(moduleId);
-
     if (!isUnlocked) {
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
       return;
     }
+
+    // Marca os áudios como "ouvidos" ao clicar nos módulos correspondentes
+    if (moduleId === 1) markIntroAsPlayed(lang || 'en');
+    if (moduleId === 2) markAudio03AsPlayed(lang || 'en');
+    if (moduleId === 3) markAudio06AsPlayed(lang || 'en');
 
     const path = `/${lang}/modulo/${moduleId}`;
     navigate(path);
@@ -44,9 +70,11 @@ const HomePage: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('isGuest');
-    localStorage.removeItem(`progress-${lang}`);
+    supabase.auth.signOut(); 
     navigate('/', { replace: true });
   };
+
+  const { main: mainModules, advanced: advancedModules } = allLanguageData[lang || 'en'].homePageModules;
 
   return (
     <div className="min-h-screen bg-black pb-20">
@@ -79,10 +107,17 @@ const HomePage: React.FC = () => {
             <span className="text-blue-400">♦</span> Módulos Principais <span className="text-blue-400">♦</span>
           </SectionTitle>
           <ModuleCarousel
-            modules={languageData.homePageModules.main.map(module => ({
-              ...module,
-              isLocked: !progress.unlockedModules.includes(module.id)
-            }))}
+            modules={mainModules.map(module => {
+              const isLockedByProgress = !progress.unlockedModules.includes(module.id);
+              const isLockedByAudio = 
+                (module.id === 1 && isModule1AudioLocked) || 
+                (module.id === 2 && isModule2AudioLocked) || 
+                (module.id === 3 && isModule3AudioLocked);
+              return { 
+                ...module, 
+                isLocked: isLockedByProgress || isLockedByAudio 
+              };
+            })}
             sectionType="course"
             onModuleClick={handleModuleClick}
           />
@@ -92,7 +127,7 @@ const HomePage: React.FC = () => {
             <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
           </SectionTitle>
           <ModuleCarousel
-            modules={languageData.homePageModules.advanced}
+            modules={advancedModules}
             sectionType="howto"
             onModuleClick={(moduleId) => alert(`Módulo ${moduleId} em desenvolvimento!`)}
           />

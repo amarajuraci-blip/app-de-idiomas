@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
-import { completeFirstReview } from '../utils/progress'; // <-- Adicionada importação
+import { completeFirstReview, getProgress, markModule2IntroAsPlayed } from '../utils/progress';
+import { playAudioOnce } from '../utils/audioPlayer';
 
 // Função para embaralhar um array (algoritmo Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -18,7 +19,6 @@ const Module2Page: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
 
-  // Obtém os cards para revisão a partir do progresso guardado localmente
   const reviewCards = useReviewCards();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -26,19 +26,36 @@ const Module2Page: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<{ text: string; isCorrect: boolean } | null>(null);
   const [imageFlashClass, setImageFlashClass] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [isIntroAudioPlaying, setIsIntroAudioPlaying] = useState(false);
 
-  // Gera uma nova pergunta sempre que os cards são carregados ou o índice muda
+  useEffect(() => {
+    if (!lang) return;
+    const progress = getProgress(lang);
+
+    if (!progress.hasPlayedModule2Intro) {
+      setIsIntroAudioPlaying(true);
+      playAudioOnce('module2_intro', '/audio/narrations/ingles/audio_04.mp3');
+      markModule2IntroAsPlayed(lang);
+
+      setTimeout(() => {
+        setIsIntroAudioPlaying(false);
+      }, 11000);
+    }
+  }, [lang]);
+
+
   useEffect(() => {
     if (reviewCards.length > 0) {
       generateQuestion(reviewCards, currentQuestionIndex);
     }
   }, [reviewCards, currentQuestionIndex]);
 
-  // Função para criar uma pergunta com 1 resposta certa e 4 erradas
   const generateQuestion = (cards: any[], index: number) => {
+    // --- LÓGICA DE CONCLUSÃO ATUALIZADA ---
     if (index >= cards.length) {
-      alert("Revisão concluída!");
-      navigate(`/${lang}/home`);
+      // Em vez de um alert, navega para a nova página de conclusão
+      navigate(`/${lang}/modulo/2/concluido`);
       return;
     }
     const correctCard = cards[index];
@@ -57,13 +74,12 @@ const Module2Page: React.FC = () => {
   };
 
   const handleAnswerClick = (selectedText: string, event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isProcessing) return;
+    if (isProcessing || isIntroAudioPlaying) return;
 
     const isCorrect = selectedText === currentQuestion?.correctAnswer;
 
-    // Se a resposta estiver correta, chama a função para desbloquear o próximo módulo
     if (isCorrect && lang) {
-      completeFirstReview(lang, 2); // Marca a revisão do Módulo 2 como feita
+      completeFirstReview(lang, 2);
     }
 
     setIsProcessing(true);
@@ -74,14 +90,12 @@ const Module2Page: React.FC = () => {
     setTimeout(() => {
       const nextIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(nextIndex);
-      // O useEffect irá gerar a próxima pergunta automaticamente
       setSelectedAnswer(null);
       setImageFlashClass('');
       setIsProcessing(false);
     }, 2000);
   };
 
-  // Função para definir a cor da borda das opções com base na resposta
   const getOptionClass = (optionText: string) => {
     if (!selectedAnswer) return 'border-gray-700';
 
@@ -99,12 +113,10 @@ const Module2Page: React.FC = () => {
   const formattedCurrent = String(currentQuestionIndex + 1).padStart(2, '0');
   const formattedTotal = String(totalQuestions).padStart(2, '0');
 
-  // Ecrã de "A carregar"
   if (reviewCards.length > 0 && !currentQuestion) {
     return <div className="h-screen bg-black text-white flex items-center justify-center">A carregar revisão...</div>;
   }
 
-  // Ecrã de "Nenhum card para rever"
   if (reviewCards.length === 0) {
       return (
         <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -148,7 +160,7 @@ const Module2Page: React.FC = () => {
             <button
               key={option.letter}
               onClick={(e) => handleAnswerClick(option.text, e)}
-              disabled={isProcessing}
+              disabled={isProcessing || isIntroAudioPlaying}
               className={`bg-gray-800 border-2 rounded-lg py-1 px-2 flex items-center w-full text-left transition-all duration-200 ${getOptionClass(option.text)} disabled:cursor-not-allowed`}
             >
               <div className="bg-gray-700 w-7 h-7 rounded-md flex items-center justify-center mr-3 flex-shrink-0">

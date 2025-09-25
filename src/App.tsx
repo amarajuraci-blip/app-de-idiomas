@@ -1,4 +1,5 @@
-import React from 'react';
+// A linha 'import React from 'react';' foi removida daqui.
+
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -13,6 +14,7 @@ import Module3Page from './components/Module3Page';
 import Module4Page from './components/Module4Page';
 import Module5Page from './components/Module5Page';
 import LessonCompletionPage from './components/LessonCompletionPage';
+import ModuleCompletionPage from './components/ModuleCompletionPage';
 
 function App() {
   return (
@@ -37,10 +39,20 @@ function App() {
         <Route path="/:lang/modulo/4" element={<ProtectedRoute><Module4Page /></ProtectedRoute>} />
         <Route path="/:lang/modulo/5" element={<ProtectedRoute><Module5Page /></ProtectedRoute>} />
 
-        {/* Rota de conclusão SIMPLES */}
+        {/* Rota de conclusão de aula */}
         <Route 
           path="/:lang/aula-concluida" 
           element={<ProtectedRoute><LessonCompletionPage /></ProtectedRoute>} 
+        />
+
+        {/* Rotas de conclusão de Módulos */}
+        <Route 
+          path="/:lang/modulo/2/concluido" 
+          element={<ProtectedRoute><ModuleCompletionPage moduleNumber={2} /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/:lang/modulo/3/concluido" 
+          element={<ProtectedRoute><ModuleCompletionPage moduleNumber={3} /></ProtectedRoute>} 
         />
       </Routes>
     </Router>
