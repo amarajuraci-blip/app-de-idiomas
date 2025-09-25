@@ -1,17 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react'; // Importar useState
 import { useNavigate, useParams } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
-import { getProgress } from '../utils/progress'; // <-- Importamos nosso utilitário
+import { getProgress, markIntroAsPlayed, Progress } from '../utils/progress'; // Importar o tipo 'Progress'
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
 
+  // Usamos o estado para gerir o progresso, lendo do localStorage uma vez na inicialização
+  const [progress, setProgress] = useState<Progress>(() => getProgress(lang || 'en'));
+
   const languageData = allLanguageData[lang || 'en'];
-  const progress = getProgress(lang || 'en'); // <-- Lemos o progresso do aluno
+
+  useEffect(() => {
+    if (!lang) return;
+    
+    // Agora verificamos o nosso estado interno, que é mais fiável
+    if (!progress.hasPlayedIntro) {
+      const introAudio = new Audio(`/audio/narrations/ingles/audio_01.mp3`);
+      introAudio.play();
+      
+      // Atualizamos o localStorage
+      markIntroAsPlayed(lang);
+      // E também atualizamos o nosso estado interno para refletir a mudança imediatamente
+      setProgress(currentProgress => ({ ...currentProgress, hasPlayedIntro: true }));
+    }
+  }, [lang, progress.hasPlayedIntro]); // O efeito depende do estado 'hasPlayedIntro'
 
   const handleModuleClick = (moduleId: number) => {
     const isUnlocked = progress.unlockedModules.includes(moduleId);
@@ -21,13 +38,11 @@ const HomePage: React.FC = () => {
       return;
     }
 
-    // Navegação padrão se o módulo estiver desbloqueado
     const path = `/${lang}/modulo/${moduleId}`;
     navigate(path);
   };
 
   const handleLogout = () => {
-    // Limpa o progresso de convidado e a sessão do Supabase
     localStorage.removeItem('isGuest');
     localStorage.removeItem(`progress-${lang}`);
     navigate('/', { replace: true });
@@ -66,7 +81,7 @@ const HomePage: React.FC = () => {
           <ModuleCarousel
             modules={languageData.homePageModules.main.map(module => ({
               ...module,
-              isLocked: !progress.unlockedModules.includes(module.id) // <-- Adicionamos o estado de bloqueio
+              isLocked: !progress.unlockedModules.includes(module.id)
             }))}
             sectionType="course"
             onModuleClick={handleModuleClick}
@@ -76,7 +91,6 @@ const HomePage: React.FC = () => {
           <SectionTitle>
             <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
           </SectionTitle>
-           {/* Módulos avançados podem ter sua própria lógica de bloqueio se necessário */}
           <ModuleCarousel
             modules={languageData.homePageModules.advanced}
             sectionType="howto"

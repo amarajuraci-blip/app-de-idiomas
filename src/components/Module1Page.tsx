@@ -2,106 +2,128 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Play, Lock } from 'lucide-react';
 import { allLanguageData } from '../data/modules';
-import { getProgress } from '../utils/progress';
+import { getProgress, markModule1IntroAsPlayed, Progress } from '../utils/progress'; // Importar o tipo 'Progress'
 
+// ... (Componentes CountdownTimer e LessonItem continuam os mesmos) ...
 interface CountdownTimerProps {
-  unlockTime: number;
-  onTimerEnd: () => void; // <-- Adicionamos a prop para notificar o fim
-}
-
-const CountdownTimer: React.FC<CountdownTimerProps> = ({ unlockTime, onTimerEnd }) => {
-  const [timeLeft, setTimeLeft] = useState(unlockTime - Date.now());
-
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      onTimerEnd(); // <-- Notifica o componente pai
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      const newTimeLeft = unlockTime - Date.now();
-      if (newTimeLeft <= 0) {
-        clearInterval(intervalId);
-        onTimerEnd(); // <-- Notifica o componente pai
-      }
-      setTimeLeft(newTimeLeft);
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [unlockTime, timeLeft, onTimerEnd]);
-
-  if (timeLeft <= 0) {
-    return null;
+    unlockTime: number;
+    onTimerEnd: () => void;
   }
-
-  const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
-  const seconds = Math.floor((timeLeft / 1000) % 60);
-
-  return (
-    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-      <Lock className="w-10 h-10 mb-2" />
-      <div className="text-xl font-bold">
-        {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+  
+  const CountdownTimer: React.FC<CountdownTimerProps> = ({ unlockTime, onTimerEnd }) => {
+    const [timeLeft, setTimeLeft] = useState(unlockTime - Date.now());
+  
+    useEffect(() => {
+      if (timeLeft <= 0) {
+        onTimerEnd();
+        return;
+      }
+  
+      const intervalId = setInterval(() => {
+        const newTimeLeft = unlockTime - Date.now();
+        if (newTimeLeft <= 0) {
+          clearInterval(intervalId);
+          onTimerEnd();
+        }
+        setTimeLeft(newTimeLeft);
+      }, 1000);
+  
+      return () => clearInterval(intervalId);
+    }, [unlockTime, timeLeft, onTimerEnd]);
+  
+    if (timeLeft <= 0) {
+      return null;
+    }
+  
+    const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
+    const seconds = Math.floor((timeLeft / 1000) % 60);
+  
+    return (
+      <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
+        <Lock className="w-10 h-10 mb-2" />
+        <div className="text-xl font-bold">
+          {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+        </div>
+        <div className="text-sm">Próxima aula liberada em</div>
       </div>
-      <div className="text-sm">Próxima aula liberada em</div>
-    </div>
-  );
-};
-
-interface LessonItemProps {
-  title: string;
-  thumbnailUrl: string;
-  onClick: () => void;
-  isLocked: boolean;
-  unlockTime: number;
-  onTimerEnd: () => void;
-}
-
-const LessonItem: React.FC<LessonItemProps> = ({ title, thumbnailUrl, onClick, isLocked, unlockTime, onTimerEnd }) => {
-  return (
-    <div
-      onClick={!isLocked ? onClick : undefined}
-      className={`group ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-    >
-      <h3 className="text-white font-semibold text-xl mb-3">
-        {title}
-      </h3>
-      <div className={`rounded-lg overflow-hidden relative ${isLocked ? 'filter grayscale' : ''}`}>
-        <img
-          src={thumbnailUrl}
-          alt={title}
-          className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        {!isLocked && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Play className="w-12 h-12 text-white" fill="currentColor" />
-          </div>
-        )}
-        {isLocked && <CountdownTimer unlockTime={unlockTime} onTimerEnd={onTimerEnd} />}
+    );
+  };
+  
+  interface LessonItemProps {
+    title: string;
+    thumbnailUrl: string;
+    onClick: () => void;
+    isLocked: boolean;
+    unlockTime: number;
+    onTimerEnd: () => void;
+  }
+  
+  const LessonItem: React.FC<LessonItemProps> = ({ title, thumbnailUrl, onClick, isLocked, unlockTime, onTimerEnd }) => {
+    return (
+      <div
+        onClick={!isLocked ? onClick : undefined}
+        className={`group ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        <h3 className="text-white font-semibold text-xl mb-3">
+          {title}
+        </h3>
+        <div className={`rounded-lg overflow-hidden relative ${isLocked ? 'filter grayscale' : ''}`}>
+          <img
+            src={thumbnailUrl}
+            alt={title}
+            className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {!isLocked && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Play className="w-12 h-12 text-white" fill="currentColor" />
+            </div>
+          )}
+          {isLocked && <CountdownTimer unlockTime={unlockTime} onTimerEnd={onTimerEnd} />}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 const Module1Page: React.FC = () => {
     const navigate = useNavigate();
     const { lang } = useParams<{ lang: string }>();
     const [visibleLessons, setVisibleLessons] = useState<any[]>([]);
-    // Estado para forçar a atualização da página
+    
+    // Usamos o estado para o progresso, assim como na HomePage
+    const [progress, setProgress] = useState<Progress>(() => getProgress(lang || 'en'));
+    
     const [_, setForceUpdate] = useState(0);
 
     const languageData = allLanguageData[lang || 'en'];
     const allLessons = languageData.lessons;
 
-    const updateLessons = useCallback(() => {
-        const progress = getProgress(lang || 'en');
-        const lastLessonCompleted = progress.lastLessonCompleted || 0;
-        const lessonsToShow = allLessons.filter(lesson => lesson.id <= lastLessonCompleted + 1);
+    useEffect(() => {
+        if (!lang) return;
 
+        // Verificamos o estado interno
+        if (!progress.hasPlayedModule1Intro) {
+            const introAudio = new Audio(`/audio/narrations/ingles/audio_02.mp3`);
+            introAudio.play();
+            
+            // Atualizamos o localStorage
+            markModule1IntroAsPlayed(lang);
+            // E atualizamos o estado interno
+            setProgress(currentProgress => ({...currentProgress, hasPlayedModule1Intro: true}));
+        }
+    }, [lang, progress.hasPlayedModule1Intro]);
+
+
+    const updateLessons = useCallback(() => {
+        const currentProgress = getProgress(lang || 'en');
+        setProgress(currentProgress); // Sincroniza o estado com o localStorage
+        
+        const lastLessonCompleted = currentProgress.lastLessonCompleted || 0;
+        let lessonsToShow = allLessons.filter(lesson => lesson.id <= lastLessonCompleted + 1);
+        
         const isGuest = localStorage.getItem('isGuest') === 'true';
         if (isGuest && lastLessonCompleted >= 2) {
-            // Trava o progresso
+             lessonsToShow = allLessons.filter(lesson => lesson.id <= 2);
         }
 
         setVisibleLessons(lessonsToShow.reverse());
@@ -112,7 +134,6 @@ const Module1Page: React.FC = () => {
     }, [updateLessons]);
 
     const handleTimerEnd = () => {
-        // Apenas força uma nova renderização para recalcular o estado de bloqueio
         setForceUpdate(Date.now());
         updateLessons();
     };
@@ -163,7 +184,6 @@ const Module1Page: React.FC = () => {
 
             <div className="space-y-6 px-4 md:px-0">
               {visibleLessons.map((lesson) => {
-                 const progress = getProgress(lang || 'en');
                  const isCompleted = lesson.id <= progress.lastLessonCompleted;
                  const unlockTime = progress.lessonUnlockTimes?.[lesson.id] || 0;
                  const isLocked = !isCompleted && Date.now() < unlockTime;
@@ -177,7 +197,7 @@ const Module1Page: React.FC = () => {
                     onClick={() => handleLessonClick(lesson.id)}
                     isLocked={isLocked}
                     unlockTime={unlockTime}
-                    onTimerEnd={handleTimerEnd} // Passa a função para o item da lição
+                    onTimerEnd={handleTimerEnd}
                   />
                 )
               })}
