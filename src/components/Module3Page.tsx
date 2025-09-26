@@ -51,12 +51,25 @@ const Module3Page: React.FC = () => {
     }
   }, [lang]);
 
+  const playAudio = (audioUrl: string) => {
+    const audio = new Audio(audioUrl);
+    audio.play().catch(e => console.error("Erro ao tocar áudio:", e));
+  };
 
   useEffect(() => {
     if (reviewCards.length > 0) {
       generateQuestion(reviewCards, 0);
     }
   }, [reviewCards]);
+  
+  // --- NOVA LÓGICA ---
+  // Toca o áudio automaticamente a partir da segunda pergunta
+  useEffect(() => {
+    if (currentQuestion && currentQuestionIndex > 0 && !showResult) {
+      playAudio(currentQuestion.audioUrl);
+    }
+  }, [currentQuestion, currentQuestionIndex, showResult]);
+
 
   const generateQuestion = (cards: Card[], index: number) => {
     if (cards.length === 0) return;
@@ -73,11 +86,6 @@ const Module3Page: React.FC = () => {
       options: options.map(card => ({ id: card.id, imageUrl: card.imageUrl })),
       correctAnswer: correctCard,
     });
-  };
-
-  const playAudio = (audioUrl: string) => {
-    const audio = new Audio(audioUrl);
-    audio.play();
   };
 
   const handleAnswerClick = (selectedId: number) => {
@@ -118,9 +126,6 @@ const Module3Page: React.FC = () => {
     );
   }
 
-  // --- CORREÇÃO AQUI ---
-  // Se ainda não temos uma pergunta carregada, mostramos a mensagem de carregamento.
-  // Isto garante ao TypeScript que, se o código continuar, 'currentQuestion' não é mais nulo.
   if (!currentQuestion) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">Carregando revisão...</div>;
   }
