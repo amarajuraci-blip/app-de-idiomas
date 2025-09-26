@@ -54,6 +54,14 @@ function App() {
           path="/:lang/modulo/3/concluido" 
           element={<ProtectedRoute><ModuleCompletionPage moduleNumber={3} /></ProtectedRoute>} 
         />
+        <Route 
+          path="/:lang/modulo/4/concluido" 
+          element={<ProtectedRoute><ModuleCompletionPage moduleNumber={4} /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/:lang/modulo/5/concluido" 
+          element={<ProtectedRoute><ModuleCompletionPage moduleNumber={5} /></ProtectedRoute>} 
+        />
       </Routes>
     </Router>
   );

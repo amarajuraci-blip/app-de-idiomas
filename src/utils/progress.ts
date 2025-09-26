@@ -7,9 +7,16 @@ export interface Progress {
   hasPlayedAudio03?: boolean;
   hasPlayedModule2Intro?: boolean;
   hasPlayedModule2Completion?: boolean;
-  hasPlayedAudio06?: boolean; // <-- NOVA PROPRIEDADE (Guia para o Módulo 3)
-  hasPlayedModule3Intro?: boolean; // <-- NOVA PROPRIEDADE (Introdução do Módulo 3)
-  hasPlayedModule3Completion?: boolean; // <-- NOVA PROPRIEDADE (Conclusão do Módulo 3)
+  hasPlayedAudio06?: boolean;
+  hasPlayedModule3Intro?: boolean;
+  hasPlayedModule3Completion?: boolean;
+  hasPlayedAudio09?: boolean;
+  hasPlayedAudio13?: boolean; // <-- NOVA PROPRIEDADE (Guia para o Módulo 5)
+  hasPlayedModule4Intro?: boolean;
+  hasPlayedAudio11?: boolean;
+  hasPlayedModule4Completion?: boolean;
+  hasPlayedModule5Intro?: boolean;
+  hasPlayedModule5Completion?: boolean;
   lessonUnlockTimes: { [key: number]: number };
   unlockedModules: number[];
   completedReviews: { [key: number]: boolean };
@@ -26,9 +33,16 @@ export const getProgress = (lang: string): Progress => {
       hasPlayedAudio03: false,
       hasPlayedModule2Intro: false,
       hasPlayedModule2Completion: false,
-      hasPlayedAudio06: false, // <-- VALOR PADRÃO
-      hasPlayedModule3Intro: false, // <-- VALOR PADRÃO
-      hasPlayedModule3Completion: false, // <-- VALOR PADRÃO
+      hasPlayedAudio06: false,
+      hasPlayedModule3Intro: false,
+      hasPlayedModule3Completion: false,
+      hasPlayedAudio09: false,
+      hasPlayedAudio13: false, // <-- VALOR PADRÃO
+      hasPlayedModule4Intro: false,
+      hasPlayedAudio11: false,
+      hasPlayedModule4Completion: false,
+      hasPlayedModule5Intro: false,
+      hasPlayedModule5Completion: false,
       lessonUnlockTimes: {},
       unlockedModules: [1],
       completedReviews: {},
@@ -42,9 +56,16 @@ export const getProgress = (lang: string): Progress => {
     hasPlayedAudio03: false,
     hasPlayedModule2Intro: false,
     hasPlayedModule2Completion: false,
-    hasPlayedAudio06: false, // <-- VALOR PADRÃO
-    hasPlayedModule3Intro: false, // <-- VALOR PADRÃO
-    hasPlayedModule3Completion: false, // <-- VALOR PADRÃO
+    hasPlayedAudio06: false,
+    hasPlayedModule3Intro: false,
+    hasPlayedModule3Completion: false,
+    hasPlayedAudio09: false,
+    hasPlayedAudio13: false, // <-- VALOR PADRÃO
+    hasPlayedModule4Intro: false,
+    hasPlayedAudio11: false,
+    hasPlayedModule4Completion: false,
+    hasPlayedModule5Intro: false,
+    hasPlayedModule5Completion: false,
     lessonUnlockTimes: {},
     unlockedModules: [1],
     completedReviews: {},
@@ -55,7 +76,6 @@ export const saveProgress = (lang: string, progress: Progress) => {
   localStorage.setItem(`progress-${lang}`, JSON.stringify(progress));
 };
 
-// ... (saveLessonProgress e as outras funções de "mark" continuam as mesmas)
 export const saveLessonProgress = (lang: string, lessonId: number) => {
     const progressKey = `progress-${lang}`;
     const currentProgress = getProgress(lang);
@@ -80,25 +100,22 @@ export const markModule1IntroAsPlayed = (lang: string) => { const p = getProgres
 export const markAudio03AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio03 = true; saveProgress(lang, p); };
 export const markModule2IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule2Intro = true; saveProgress(lang, p); };
 export const markModule2CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule2Completion = true; saveProgress(lang, p); };
+export const markAudio06AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio06 = true; saveProgress(lang, p); };
+export const markModule3IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule3Intro = true; saveProgress(lang, p); };
+export const markModule3CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule3Completion = true; saveProgress(lang, p); };
+export const markAudio09AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio09 = true; saveProgress(lang, p); };
+export const markModule4IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule4Intro = true; saveProgress(lang, p); };
+export const markAudio11AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio11 = true; saveProgress(lang, p); };
+export const markModule4CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule4Completion = true; saveProgress(lang, p); };
+export const markModule5IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule5Intro = true; saveProgress(lang, p); };
+export const markModule5CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule5Completion = true; saveProgress(lang, p); };
 
-
-// <-- NOVAS FUNÇÕES PARA MARCAR OS ÁUDIOS DO MÓDULO 3 -->
-export const markAudio06AsPlayed = (lang: string) => {
+// <-- NOVA FUNÇÃO PARA MARCAR O ÁUDIO 13 -->
+export const markAudio13AsPlayed = (lang: string) => {
   const currentProgress = getProgress(lang);
-  currentProgress.hasPlayedAudio06 = true;
+  currentProgress.hasPlayedAudio13 = true;
   saveProgress(lang, currentProgress);
 };
-export const markModule3IntroAsPlayed = (lang: string) => {
-  const currentProgress = getProgress(lang);
-  currentProgress.hasPlayedModule3Intro = true;
-  saveProgress(lang, currentProgress);
-};
-export const markModule3CompletionAsPlayed = (lang: string) => {
-  const currentProgress = getProgress(lang);
-  currentProgress.hasPlayedModule3Completion = true;
-  saveProgress(lang, currentProgress);
-};
-
 
 export const completeFirstReview = (lang: string, moduleId: number) => {
   const progress = getProgress(lang);
