@@ -4,8 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
 import { completeFirstReview, getProgress, markModule2IntroAsPlayed } from '../utils/progress';
 import { playAudioOnce } from '../utils/audioPlayer';
+import { playFeedbackAudio } from '../utils/feedbackPlayer'; // <-- NOVA IMPORTAÇÃO
 
-// Função para embaralhar um array (algoritmo Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -52,9 +52,7 @@ const Module2Page: React.FC = () => {
   }, [reviewCards, currentQuestionIndex]);
 
   const generateQuestion = (cards: any[], index: number) => {
-    // --- LÓGICA DE CONCLUSÃO ATUALIZADA ---
     if (index >= cards.length) {
-      // Em vez de um alert, navega para a nova página de conclusão
       navigate(`/${lang}/modulo/2/concluido`);
       return;
     }
@@ -77,6 +75,9 @@ const Module2Page: React.FC = () => {
     if (isProcessing || isIntroAudioPlaying) return;
 
     const isCorrect = selectedText === currentQuestion?.correctAnswer;
+    
+    // --- TOCA O ÁUDIO DE FEEDBACK ---
+    playFeedbackAudio(isCorrect);
 
     if (isCorrect && lang) {
       completeFirstReview(lang, 2);

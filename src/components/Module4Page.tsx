@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
 import { completeFirstReview, getProgress, markModule4IntroAsPlayed, markAudio11AsPlayed } from '../utils/progress';
 import { playAudioOnce } from '../utils/audioPlayer';
+import { playFeedbackAudio } from '../utils/feedbackPlayer'; // <-- NOVA IMPORTAÇÃO
 
 const Module4Page: React.FC = () => {
   const navigate = useNavigate();
@@ -33,17 +34,14 @@ const Module4Page: React.FC = () => {
   const handleReveal = () => {
     if (isIntroAudioPlaying || isRevealAudioPlaying) return;
 
-    // 1. Revela a resposta imediatamente
     setIsRevealed(true);
 
-    // 2. Toca o áudio de narração se for a primeira vez
     if (lang) {
       const progress = getProgress(lang);
       if (!progress.hasPlayedAudio11) {
         setIsRevealAudioPlaying(true);
         playAudioOnce('audio_11', '/audio/narrations/ingles/audio_11.mp3');
         markAudio11AsPlayed(lang);
-        // Mantém os botões desativados enquanto o áudio toca
         setTimeout(() => {
           setIsRevealAudioPlaying(false);
         }, 10000);
@@ -54,12 +52,17 @@ const Module4Page: React.FC = () => {
   const handleFeedback = (feedback: 'yes' | 'no') => {
     if (isProcessing || isIntroAudioPlaying || isRevealAudioPlaying) return;
 
-    if (feedback === 'yes' && lang) {
-      completeFirstReview(lang, 4);
+    const isCorrect = feedback === 'yes';
+
+    // --- TOCA O ÁUDIO DE FEEDBACK ---
+    playFeedbackAudio(isCorrect);
+
+    if (isCorrect && lang) {
+        completeFirstReview(lang, 4);
     }
 
     setIsProcessing(true);
-    setImageFlashClass(feedback === 'yes' ? 'flash-image-green' : 'flash-image-red');
+    setImageFlashClass(isCorrect ? 'flash-image-green' : 'flash-image-red');
 
     setTimeout(() => {
       const nextIndex = currentCardIndex + 1;

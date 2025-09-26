@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
 import { getProgress, markModule5IntroAsPlayed, completeFirstReview } from '../utils/progress';
 import { playAudioOnce } from '../utils/audioPlayer';
+import { playFeedbackAudio } from '../utils/feedbackPlayer'; // <-- NOVA IMPORTAÇÃO
 
 const Module5Page: React.FC = () => {
   const navigate = useNavigate();
@@ -46,16 +47,20 @@ const Module5Page: React.FC = () => {
 
   const handleFeedback = (feedback: 'yes' | 'no') => {
     if (isProcessing || isIntroAudioPlaying) return;
-    setIsProcessing(true);
 
-    setImageFlashClass(feedback === 'yes' ? 'flash-image-green' : 'flash-image-red');
+    const isCorrect = feedback === 'yes';
+
+    // --- TOCA O ÁUDIO DE FEEDBACK ---
+    playFeedbackAudio(isCorrect);
+    
+    setIsProcessing(true);
+    setImageFlashClass(isCorrect ? 'flash-image-green' : 'flash-image-red');
 
     setTimeout(() => {
       const nextIndex = currentCardIndex + 1;
-      // --- LÓGICA DE CONCLUSÃO ATUALIZADA ---
       if (nextIndex >= reviewCards.length) {
         if (lang) completeFirstReview(lang, 5);
-        navigate(`/${lang}/modulo/5/concluido`); // Navega para a conclusão
+        navigate(`/${lang}/modulo/5/concluido`);
         return;
       }
       setCurrentCardIndex(nextIndex);
@@ -74,16 +79,16 @@ const Module5Page: React.FC = () => {
   if (reviewCards.length === 0) {
     return (
       <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-        <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para revisar!</h2>
-        <p className="text-center text-gray-400 mb-6">Complete algumas aulas no Módulo 1 para liberar as revisões.</p>
-        <button
-          onClick={() => navigate(`/${lang}/home`)}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Voltar
-        </button>
+          <h2 className="text-2xl font-bold text-center mb-4">Nenhum card para revisar!</h2>
+          <p className="text-center text-gray-400 mb-6">Complete algumas aulas no Módulo 1 para liberar as revisões.</p>
+          <button 
+              onClick={() => navigate(`/${lang}/home`)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          >
+              Voltar
+          </button>
       </div>
-    );
+    )
   }
   
   if (!currentCard) {

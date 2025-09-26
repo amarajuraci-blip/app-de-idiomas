@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useReviewCards } from '../hooks/useReviewCards';
 import { completeFirstReview, getProgress, markModule3IntroAsPlayed } from '../utils/progress';
 import { playAudioOnce } from '../utils/audioPlayer';
+import { playFeedbackAudio } from '../utils/feedbackPlayer'; // <-- NOVA IMPORTAÇÃO
 
 interface Card {
   id: number;
@@ -62,8 +63,6 @@ const Module3Page: React.FC = () => {
     }
   }, [reviewCards]);
   
-  // --- NOVA LÓGICA ---
-  // Toca o áudio automaticamente a partir da segunda pergunta
   useEffect(() => {
     if (currentQuestion && currentQuestionIndex > 0 && !showResult) {
       playAudio(currentQuestion.audioUrl);
@@ -93,6 +92,9 @@ const Module3Page: React.FC = () => {
 
     setIsProcessing(true);
     const isCorrect = selectedId === currentQuestion.correctAnswer.id;
+    
+    // --- TOCA O ÁUDIO DE FEEDBACK ---
+    playFeedbackAudio(isCorrect);
 
     if (isCorrect && lang) {
       completeFirstReview(lang, 3);
