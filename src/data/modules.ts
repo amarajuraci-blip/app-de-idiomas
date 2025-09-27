@@ -13,19 +13,15 @@ interface Lesson {
   cards: Card[];
 }
 
-// --- ATUALIZAÇÃO DA INTERFACE ---
 interface LanguageData {
   homePageModules: {
     main: { id: number; title: string; imageUrl: string; }[];
     advanced: { id: number; title: string; imageUrl: string; }[];
-    listeningPractice: { id: number; title: string; imageUrl: string; }[]; // <-- NOVA SEÇÃO
+    listeningPractice: { id: number; title: string; imageUrl: string; }[];
   };
   lessons: Lesson[];
 }
 
-// ========================================================================
-// --- DADOS EM INGLÊS ---
-// ========================================================================
 const englishData: LanguageData = {
   homePageModules: {
     main: [
@@ -35,31 +31,28 @@ const englishData: LanguageData = {
       { id: 4, title: "Módulo 04", imageUrl: "https://i.postimg.cc/gjB4CMYy/04-Simplifica-o-Geom-trica.png" },
       { id: 5, title: "Módulo 05", imageUrl: "https://i.postimg.cc/GhZhrGmd/3.png" }
     ],
-    // --- CONTEÚDO DOS MÓDULOS AVANÇADOS ---
     advanced: [
-      { id: 6, title: "Módulo Avançado 1", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" },
-      { id: 7, title: "Módulo Avançado 2", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" },
-      { id: 8, title: "Módulo Avançado 3", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" },
-      { id: 9, title: "Módulo Avançado 4", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" },
-      { id: 10, title: "Módulo Avançado 5", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" },
-      { id: 11, title: "Módulo Avançado 6", imageUrl: "https://i.postimg.cc/Y2Ny7W5F/avancado-1.png" }
+      { id: 6, title: "Módulo Avançado 1", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
+      { id: 7, title: "Módulo Avançado 2", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
+      { id: 8, title: "Módulo Avançado 3", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
+      { id: 9, title: "Módulo Avançado 4", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
+      { id: 10, title: "Módulo Avançado 5", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
+      { id: 11, title: "Módulo Avançado 6", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" }
     ],
-    // --- CONTEÚDO DO TREINO DE ESCUTA ---
     listeningPractice: [
-        { id: 12, title: "Treino 1", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 13, title: "Treino 2", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 14, title: "Treino 3", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 15, title: "Treino 4", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 16, title: "Treino 5", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 17, title: "Treino 6", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 18, title: "Treino 7", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 19, title: "Treino 8", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 20, title: "Treino 9", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
-        { id: 21, title: "Treino 10", imageUrl: "https://i.postimg.cc/j5G3P3j9/treino-1.png" },
+        { id: 12, title: "Treino 1", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 13, title: "Treino 2", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 14, title: "Treino 3", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 15, title: "Treino 4", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 16, title: "Treino 5", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 17, title: "Treino 6", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 18, title: "Treino 7", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 19, title: "Treino 8", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 20, title: "Treino 9", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 21, title: "Treino 10", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
     ]
   },
   lessons: [
-    // ... (o conteúdo das lições permanece o mesmo)
     {
       id: 1,
       title: "Aula 01: Primeiros Passos",

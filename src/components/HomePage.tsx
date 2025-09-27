@@ -7,6 +7,7 @@ import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
 import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed, markAudio09AsPlayed, markAudio13AsPlayed } from '../utils/progress';
 import { playAudioOnce } from '../utils/audioPlayer';
+import PaymentRequiredModal from './PaymentRequiredModal';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,8 +19,12 @@ const HomePage: React.FC = () => {
   const [isModule2AudioLocked, setIsModule2AudioLocked] = useState(false);
   const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
-  const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false); // <-- NOVO ESTADO
+  const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
   
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const pixKey = "81 9 20011267";
+  const pixName = "Ewerton David de Matos Gonçalo";
+
   useEffect(() => {
     if (!lang) return;
     const currentProgress = getProgress(lang);
@@ -29,46 +34,48 @@ const HomePage: React.FC = () => {
       playAudioOnce('main_intro', '/audio/narrations/ingles/audio_01.mp3');
       setTimeout(() => setIsModule1AudioLocked(false), 14000);
     }
-
     if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
       setIsModule2AudioLocked(true);
       playAudioOnce('audio_03', '/audio/narrations/ingles/audio_03.mp3');
       setTimeout(() => setIsModule2AudioLocked(false), 10000);
     }
-
     if (currentProgress.completedReviews[2] && !currentProgress.hasPlayedAudio06) {
       setIsModule3AudioLocked(true);
       playAudioOnce('audio_06', '/audio/narrations/ingles/audio_06.mp3');
       setTimeout(() => setIsModule3AudioLocked(false), 6000);
     }
-
     if (currentProgress.completedReviews[3] && !currentProgress.hasPlayedAudio09) {
       setIsModule4AudioLocked(true);
       playAudioOnce('audio_09', '/audio/narrations/ingles/audio_09.mp3');
       setTimeout(() => setIsModule4AudioLocked(false), 7000);
     }
-
-    // Lógica para o audio_13 após concluir o Módulo 4 <-- NOVA LÓGICA
     if (currentProgress.completedReviews[4] && !currentProgress.hasPlayedAudio13) {
-      setIsModule5AudioLocked(true); // Bloqueia o Módulo 5
+      setIsModule5AudioLocked(true);
       playAudioOnce('audio_13', '/audio/narrations/ingles/audio_13.mp3');
-      // AJUSTE AQUI A DURAÇÃO (em milissegundos) DO audio_13
-      setTimeout(() => setIsModule5AudioLocked(false), 10000); // Usando 10 segundos como placeholder
+      setTimeout(() => setIsModule5AudioLocked(false), 10000);
     }
-
   }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
+    // --- LÓGICA CORRIGIDA E FINAL ---
+    if (moduleId > 5) {
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isGuest) {
+        // Se for o utilizador "demo", mostra sempre o aviso de pagamento
+        setIsPaymentModalOpen(true);
+      } else {
+        // Se for um utilizador pagante, mostra que o conteúdo está em desenvolvimento
+        alert(`Módulo ${moduleId} em desenvolvimento!`);
+      }
+      return; // Para a execução aqui
+    }
+
+    // A lógica abaixo continua a mesma para os módulos 1 a 5
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
-    if (moduleId === 5 && isModule5AudioLocked) return; // <-- NOVA VERIFICAÇÃO
-    
-    if (moduleId > 5) {
-        alert(`Módulo ${moduleId} em desenvolvimento!`);
-        return;
-    }
+    if (moduleId === 5 && isModule5AudioLocked) return;
     
     const isUnlocked = progress.unlockedModules.includes(moduleId);
     if (!isUnlocked) {
@@ -80,7 +87,7 @@ const HomePage: React.FC = () => {
     if (moduleId === 2) markAudio03AsPlayed(lang || 'en');
     if (moduleId === 3) markAudio06AsPlayed(lang || 'en');
     if (moduleId === 4) markAudio09AsPlayed(lang || 'en');
-    if (moduleId === 5) markAudio13AsPlayed(lang || 'en'); // <-- NOVA MARCAÇÃO
+    if (moduleId === 5) markAudio13AsPlayed(lang || 'en');
 
     const path = `/${lang}/modulo/${moduleId}`;
     navigate(path);
@@ -97,89 +104,96 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black pb-20">
-      <div className="absolute top-4 right-4 z-50">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors duration-300 border border-gray-700 hover:border-gray-600"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Sair</span>
-        </button>
-      </div>
-      <section className="relative">
-        <picture>
-          <source
-            media="(max-width: 768px)"
-            srcSet="https://i.imgur.com/nkjNoNO.jpg"
-          />
-          <img
-            src="https://i.imgur.com/ru9WoNh.jpg"
-            alt="Banner Principal"
-            className="w-full h-[40vh] md:h-[60vh] object-cover"
-          />
-        </picture>
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-      </section>
-      <div className="container mx-auto px-4 py-16 max-w-7xl">
-        <section className="mb-12 md:mb-20">
-          <SectionTitle>
-            <span className="text-blue-400">♦</span> Módulos Principais <span className="text-blue-400">♦</span>
-          </SectionTitle>
-          <ModuleCarousel
-            modules={mainModules.map(module => {
-              const isLockedByProgress = !progress.unlockedModules.includes(module.id);
-              const isLockedByAudio = 
-                (module.id === 1 && isModule1AudioLocked) || 
-                (module.id === 2 && isModule2AudioLocked) || 
-                (module.id === 3 && isModule3AudioLocked) ||
-                (module.id === 4 && isModule4AudioLocked) ||
-                (module.id === 5 && isModule5AudioLocked); // <-- NOVA VERIFICAÇÃO
-              return { 
-                ...module, 
-                isLocked: isLockedByProgress || isLockedByAudio 
-              };
-            })}
-            sectionType="course"
-            onModuleClick={handleModuleClick}
-          />
-        </section>
-
-        {showAdvancedContent && (
-          <>
-            <section className="mb-12 md:mb-20">
-              <SectionTitle>
-                <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
-              </SectionTitle>
-              <ModuleCarousel
-                modules={advancedModules}
-                sectionType="howto"
-                onModuleClick={handleModuleClick}
-              />
-            </section>
-            
-            <section className="mb-12 md:mb-20">
-              <SectionTitle>
-                <span className="text-red-400">♥</span> Treino de escuta <span className="text-red-400">♥</span>
-              </SectionTitle>
-              <ModuleCarousel
-                modules={listeningPractice}
-                sectionType="bonus"
-                onModuleClick={handleModuleClick}
-              />
-            </section>
-          </>
-        )}
-      </div>
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
-            Seu Curso de Idiomas
-          </h3>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            A sua jornada para a fluência começa aqui.
-          </p>
+        <PaymentRequiredModal 
+            isOpen={isPaymentModalOpen}
+            onClose={() => setIsPaymentModalOpen(false)}
+            pixKey={pixKey}
+            pixName={pixName}
+        />
+        <div className="absolute top-4 right-4 z-50">
+            <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors duration-300 border border-gray-700 hover:border-gray-600"
+            >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Sair</span>
+            </button>
         </div>
-      </footer>
+        <section className="relative">
+            <picture>
+                <source
+                    media="(max-width: 768px)"
+                    srcSet="https://i.imgur.com/nkjNoNO.jpg"
+                />
+                <img
+                    src="https://i.imgur.com/ru9WoNh.jpg"
+                    alt="Banner Principal"
+                    className="w-full h-[40vh] md:h-[60vh] object-cover"
+                />
+            </picture>
+            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        </section>
+        <div className="container mx-auto px-4 py-16 max-w-7xl">
+            <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    <span className="text-blue-400">♦</span> Módulos Principais <span className="text-blue-400">♦</span>
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={mainModules.map(module => {
+                    const isLockedByProgress = !progress.unlockedModules.includes(module.id);
+                    const isLockedByAudio = 
+                        (module.id === 1 && isModule1AudioLocked) || 
+                        (module.id === 2 && isModule2AudioLocked) || 
+                        (module.id === 3 && isModule3AudioLocked) ||
+                        (module.id === 4 && isModule4AudioLocked) ||
+                        (module.id === 5 && isModule5AudioLocked);
+                    return { 
+                        ...module, 
+                        isLocked: isLockedByProgress || isLockedByAudio 
+                    };
+                    })}
+                    sectionType="course"
+                    onModuleClick={handleModuleClick}
+                />
+            </section>
+
+            {/* As seções continuarão a aparecer apenas após o módulo 5 */}
+            {showAdvancedContent && (
+            <>
+                <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={advancedModules}
+                    sectionType="howto"
+                    onModuleClick={handleModuleClick}
+                />
+                </section>
+                
+                <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    <span className="text-red-400">♥</span> Treino de escuta <span className="text-red-400">♥</span>
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={listeningPractice}
+                    sectionType="bonus"
+                    onModuleClick={handleModuleClick}
+                />
+                </section>
+            </>
+            )}
+        </div>
+        <footer className="bg-gray-900 text-white py-12">
+            <div className="container mx-auto px-4 text-center">
+            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                Seu Curso de Idiomas
+            </h3>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+                A sua jornada para a fluência começa aqui.
+            </p>
+            </div>
+        </footer>
     </div>
   );
 };
