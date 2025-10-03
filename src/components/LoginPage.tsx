@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           <img
-            src="https://i.imgur.com/ru9WoNh.jpg"
+            src="/images/visual/capa_login.webp" // <-- ALTERAÇÃO FEITA AQUI
             alt="Logo do Curso"
             className="w-full max-w-sm mx-auto rounded-lg shadow-2xl"
           />

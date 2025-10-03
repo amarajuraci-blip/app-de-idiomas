@@ -18,6 +18,7 @@ interface LanguageData {
     main: { id: number; title: string; imageUrl: string; }[];
     advanced: { id: number; title: string; imageUrl: string; }[];
     listeningPractice: { id: number; title: string; imageUrl: string; }[];
+    readingAndWriting: { id: number; title: string; imageUrl: string; }[];
   };
   lessons: Lesson[];
 }
@@ -25,38 +26,49 @@ interface LanguageData {
 const englishData: LanguageData = {
   homePageModules: {
     main: [
-      { id: 1, title: "Módulo 01", imageUrl: "https://i.postimg.cc/PrPSWk4S/01-INSTRU-ES.png" },
-      { id: 2, title: "Módulo 02", imageUrl: "https://i.postimg.cc/qBmm678t/02-Grupo-de-Atividades-EXTRA.png" },
-      { id: 3, title: "Módulo 03", imageUrl: "https://i.postimg.cc/hvGp3FqP/03-Primeiros-Tra-os.png" },
-      { id: 4, title: "Módulo 04", imageUrl: "https://i.postimg.cc/gjB4CMYy/04-Simplifica-o-Geom-trica.png" },
-      { id: 5, title: "Módulo 05", imageUrl: "https://i.postimg.cc/GhZhrGmd/3.png" }
+      { id: 1, title: "Módulo 01", imageUrl: "/images/visual/m1_01.webp" },
+      { id: 2, title: "Módulo 02", imageUrl: "/images/visual/m1_02.webp" },
+      { id: 3, title: "Módulo 03", imageUrl: "/images/visual/m1_03.webp" },
+      { id: 4, title: "Módulo 04", imageUrl: "/images/visual/m1_04.webp" },
+      { id: 5, title: "Módulo 05", imageUrl: "/images/visual/m1_05.webp" }
     ],
     advanced: [
-      { id: 6, title: "Módulo Avançado 1", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
-      { id: 7, title: "Módulo Avançado 2", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
-      { id: 8, title: "Módulo Avançado 3", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
-      { id: 9, title: "Módulo Avançado 4", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
-      { id: 10, title: "Módulo Avançado 5", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" },
-      { id: 11, title: "Módulo Avançado 6", imageUrl: "https://i.postimg.cc/d1yY24Rj/avancado-placeholder.png" }
+      { id: 6, title: "Módulo Avançado 1", imageUrl: "/images/visual/m2_01.webp" },
+      { id: 7, title: "Módulo Avançado 2", imageUrl: "/images/visual/m2_02.webp" },
+      { id: 8, title: "Módulo Avançado 3", imageUrl: "/images/visual/m2_03.webp" },
+      { id: 9, title: "Módulo Avançado 4", imageUrl: "/images/visual/m2_04.webp" },
+      { id: 10, title: "Módulo Avançado 5", imageUrl: "/images/visual/m2_05.webp" },
+      { id: 11, title: "Módulo Avançado 6", imageUrl: "/images/visual/m2_06.webp" },
+      { id: 12, title: "Módulo Avançado 7", imageUrl: "/images/visual/m2_07.webp" },
+      { id: 13, title: "Módulo Avançado 8", imageUrl: "/images/visual/m2_08.webp" },
+      { id: 14, title: "Módulo Avançado 9", imageUrl: "/images/visual/m2_09.webp" },
+      { id: 15, title: "Módulo Avançado 10", imageUrl: "/images/visual/m2_10.webp" },
     ],
     listeningPractice: [
-        { id: 12, title: "Treino 1", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 13, title: "Treino 2", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 14, title: "Treino 3", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 15, title: "Treino 4", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 16, title: "Treino 5", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 17, title: "Treino 6", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 18, title: "Treino 7", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 19, title: "Treino 8", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 20, title: "Treino 9", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
-        { id: 21, title: "Treino 10", imageUrl: "https://i.postimg.cc/t46M3yGN/escuta-placeholder.png" },
+        { id: 16, title: "Treino 1", imageUrl: "/images/visual/m3_01.webp" },
+        { id: 17, title: "Treino 2", imageUrl: "/images/visual/m3_02.webp" },
+        { id: 18, title: "Treino 3", imageUrl: "/images/visual/m3_03.webp" },
+        { id: 19, title: "Treino 4", imageUrl: "/images/visual/m3_04.webp" },
+        { id: 20, title: "Treino 5", imageUrl: "/images/visual/m3_05.webp" },
+        { id: 21, title: "Treino 6", imageUrl: "/images/visual/m3_06.webp" },
+        { id: 22, title: "Treino 7", imageUrl: "/images/visual/m3_07.webp" },
+        { id: 23, title: "Treino 8", imageUrl: "/images/visual/m3_08.webp" },
+        { id: 24, title: "Treino 9", imageUrl: "/images/visual/m3_09.webp" },
+        { id: 25, title: "Treino 10", imageUrl: "/images/visual/m3_10.webp" },
+    ],
+    readingAndWriting: [
+      { id: 26, title: "Leitura 1", imageUrl: "/images/visual/m4_01.webp" },
+      { id: 27, title: "Leitura 2", imageUrl: "/images/visual/m4_02.webp" },
+      { id: 28, title: "Leitura 3", imageUrl: "/images/visual/m4_03.webp" },
+      { id: 29, title: "Leitura 4", imageUrl: "/images/visual/m4_04.webp" },
+      { id: 30, title: "Leitura 5", imageUrl: "/images/visual/m4_05.webp" },
     ]
   },
   lessons: [
     {
       id: 1,
       title: "Aula 01: Primeiros Passos",
-      thumbnailUrl: "https://i.postimg.cc/QNw4hkv6/01.png",
+      thumbnailUrl: "/images/visual/Thumbnail1.webp", // <-- ALTERAÇÃO AQUI
       cards: [
         { id: 101, portuguese: 'Sino', translation: 'Bell', imageUrl: '/images/aula1/Bell.webp', audioUrl: '/audio/ingles/aula1/bell.mp3' },
         { id: 102, portuguese: 'Bicicleta', translation: 'Bicycle', imageUrl: '/images/aula1/bicycle.webp', audioUrl: '/audio/ingles/aula1/bicycle.mp3' },
@@ -75,7 +87,7 @@ const englishData: LanguageData = {
     {
       id: 2,
       title: "Aula 02: Animais da Quinta",
-      thumbnailUrl: "https://i.postimg.cc/tCNk0vjW/aula2-thumb.png",
+      thumbnailUrl: "/images/visual/Thumbnail2.webp", // <-- ALTERAÇÃO AQUI
       cards: [
         { id: 113, portuguese: 'Periquito', translation: 'Budgie', imageUrl: '/images/aula2/budgie.webp', audioUrl: '/audio/ingles/aula2/budgie.mp3' },
         { id: 114, portuguese: 'Touro', translation: 'Bull', imageUrl: '/images/aula2/bull.webp', audioUrl: '/audio/ingles/aula2/bull.mp3' },
@@ -94,7 +106,7 @@ const englishData: LanguageData = {
     {
       id: 3,
       title: "Aula 03: Frutas",
-      thumbnailUrl: "https://i.postimg.cc/PqYg4z8T/aula3-thumb.png",
+      thumbnailUrl: "/images/visual/Thumbnail3.webp", // <-- ALTERAÇÃO AQUI
       cards: [
         { id: 125, portuguese: 'Maçã', translation: 'Apple', imageUrl: '/images/aula3/apple.webp', audioUrl: '/audio/ingles/aula3/apple.mp3' },
         { id: 126, portuguese: 'Abacate', translation: 'Avocado', imageUrl: '/images/aula3/avocado.webp', audioUrl: '/audio/ingles/aula3/avocado.mp3' },
@@ -113,9 +125,9 @@ const englishData: LanguageData = {
   ]
 };
 
-const japaneseData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [] }, lessons: [] };
-const koreanData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [] }, lessons: [] };
-const frenchData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [] }, lessons: [] };
+const japaneseData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [], readingAndWriting: [] }, lessons: [] };
+const koreanData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [], readingAndWriting: [] }, lessons: [] };
+const frenchData: LanguageData = { homePageModules: { ...englishData.homePageModules, advanced: [], listeningPractice: [], readingAndWriting: [] }, lessons: [] };
 
 export const allLanguageData: { [key: string]: LanguageData } = {
   en: englishData,
@@ -125,8 +137,14 @@ export const allLanguageData: { [key: string]: LanguageData } = {
 };
 
 export const languageModules = [
-  { id: 1, code: 'en', title: "Inglês", imageUrl: "https://i.postimg.cc/PrPSWk4S/01-INSTRU-ES.png" },
-  { id: 2, code: 'jp', title: "Japonês", imageUrl: "https://i.postimg.cc/qBmm678t/02-Grupo-de-Atividades-EXTRA.png" },
-  { id: 3, code: 'kr', title: "Coreano", imageUrl: "https://i.postimg.cc/hvGp3FqP/03-Primeiros-Tra-os.png" },
-  { id: 4, code: 'fr', title: "Francês", imageUrl: "https://i.postimg.cc/gjB4CMYy/04-Simplifica-o-Geom-trica.png" }
+  { id: 1, code: 'en', title: "Inglês", imageUrl: "/images/visual/eng.webp" },
+  { id: 2, code: 'jp', title: "Japonês", imageUrl: "/images/visual/jpa.webp" },
+  { id: 3, code: 'kr', title: "Coreano", imageUrl: "/images/visual/cor.webp" },
+  { id: 4, code: 'fr', title: "Francês", imageUrl: "/images/visual/fra.webp" },
+  { id: 5, code: 'es', title: "Espanhol", imageUrl: "/images/visual/esp.webp" },
+  { id: 6, code: 'de', title: "Alemão", imageUrl: "/images/visual/ger.webp" },
+  { id: 7, code: 'it', title: "Italiano", imageUrl: "/images/visual/ita.webp" },
+  { id: 8, code: 'ru', title: "Russo", imageUrl: "/images/visual/rus.webp" },
+  { id: 9, code: 'zh', title: "Mandarim", imageUrl: "/images/visual/chi.webp" },
+  { id: 10, code: 'tr', title: "Turco", imageUrl: "/images/visual/tur.webp" }
 ];
