@@ -65,14 +65,11 @@ const HomePage: React.FC = () => {
   }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
-    // --- LÓGICA CORRIGIDA AQUI ---
-    // Se o ID do módulo for 6 ou maior, ele pertence às sessões 2, 3 ou 4.
     if (moduleId >= 6) {
       setIsWarningOpen(true);
       return;
     }
 
-    // A lógica abaixo agora se aplica apenas aos módulos da primeira sessão (1 a 5).
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
@@ -136,8 +133,9 @@ const HomePage: React.FC = () => {
         </section>
         <div className="container mx-auto px-4 py-16 max-w-7xl">
             <section className="mb-12 md:mb-20">
-                <SectionTitle>
-                    <span className="text-blue-400">♦</span> Módulos Principais <span className="text-blue-400">♦</span>
+                {/* --- NOME DA SESSÃO 1 ATUALIZADO --- */}
+                <SectionTitle symbol="♥" lineGradient="from-pink-500 to-red-500">
+                    PRIMEIRA SESSÃO - VOCABULÁRIO:
                 </SectionTitle>
                 <ModuleCarousel
                     modules={mainModules.map(module => ({
@@ -156,9 +154,10 @@ const HomePage: React.FC = () => {
 
             {showAdvancedContent && (
             <>
+                {/* --- NOME DA SESSÃO 2 ATUALIZADO --- */}
                 <section className="mb-12 md:mb-20">
-                    <SectionTitle>
-                        <span className="text-green-400">♦</span> Módulos Avançados <span className="text-green-400">♦</span>
+                    <SectionTitle symbol="♣" lineGradient="from-green-400 to-cyan-500">
+                        SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
                     </SectionTitle>
                     <ModuleCarousel
                         modules={advancedModules}
@@ -167,9 +166,10 @@ const HomePage: React.FC = () => {
                     />
                 </section>
                 
+                {/* --- NOME DA SESSÃO 3 ATUALIZADO --- */}
                 <section className="mb-12 md:mb-20">
-                    <SectionTitle>
-                        <span className="text-red-400">♥</span> Treino de escuta <span className="text-red-400">♥</span>
+                    <SectionTitle symbol="♦" lineGradient="from-blue-400 to-purple-500">
+                        TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
                     </SectionTitle>
                     <ModuleCarousel
                         modules={listeningPractice}
@@ -178,9 +178,10 @@ const HomePage: React.FC = () => {
                     />
                 </section>
 
+                {/* --- NOME DA SESSÃO 4 ATUALIZADO --- */}
                 <section className="mb-12 md:mb-20">
-                    <SectionTitle>
-                        <span className="text-yellow-400">♠</span> Quarta sessão – Leitura e escrita: <span className="text-yellow-400">♠</span>
+                    <SectionTitle symbol="♠" lineGradient="from-yellow-400 to-orange-500">
+                        QUARTA SESSÃO – LEITURA E ESCRITA:
                     </SectionTitle>
                     <ModuleCarousel
                         modules={readingAndWriting}
