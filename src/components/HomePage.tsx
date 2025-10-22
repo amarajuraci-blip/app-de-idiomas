@@ -6,7 +6,7 @@ import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
 import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed, markAudio09AsPlayed, markAudio13AsPlayed } from '../utils/progress';
-import PaymentRequiredModal from './PaymentRequiredModal';
+// Removido PaymentRequiredModal se não for usado para esses módulos
 import WarningModal from './WarningModal';
 
 const HomePage: React.FC = () => {
@@ -14,14 +14,18 @@ const HomePage: React.FC = () => {
   const { lang } = useParams<{ lang: string }>();
   const progress = getProgress(lang || 'en');
 
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  // Removido isPaymentModalOpen se não for mais necessário aqui
   const [isWarningOpen, setIsWarningOpen] = useState(false);
-  
+
   const [isModule1AudioLocked, setIsModule1AudioLocked] = useState(false);
   const [isModule2AudioLocked, setIsModule2AudioLocked] = useState(false);
   const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
+
+  // --- NOVA LÓGICA ---
+  // Verifica se as sessões avançadas estão desbloqueadas (após completar módulo 5 da sessão 1)
+  const areAdvancedModulesUnlocked = progress.completedReviews[5];
 
   useEffect(() => {
     if (!lang) return;
@@ -37,6 +41,7 @@ const HomePage: React.FC = () => {
         }
     };
 
+    // Lógica de áudio inicial mantida
     if (!currentProgress.hasPlayedIntro) {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
@@ -65,19 +70,25 @@ const HomePage: React.FC = () => {
   }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
-    if (moduleId >= 6) {
-      setIsWarningOpen(true);
-      return;
-    }
-
+    // Verifica bloqueio por áudio para módulos 1-5
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
-    
-    const isUnlocked = progress.unlockedModules.includes(moduleId);
-    if (!isUnlocked) {
+
+    // --- LÓGICA ATUALIZADA PARA MÓDULOS AVANÇADOS ---
+    if (moduleId >= 6) {
+      if (areAdvancedModulesUnlocked) {
+        setIsWarningOpen(true); // Se desbloqueado, mostra o aviso
+      }
+      // Se não estiver desbloqueado (areAdvancedModulesUnlocked é false), não faz nada (o clique já é prevenido no Carrossel)
+      return;
+    }
+
+    // Lógica original para módulos 1-5 (verificação de desbloqueio sequencial)
+    const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
+    if (!isUnlockedSequentially) {
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
       return;
     }
@@ -88,18 +99,20 @@ const HomePage: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('isGuest');
-    supabase.auth.signOut(); 
+    supabase.auth.signOut();
     navigate('/', { replace: true });
   };
 
   const { main: mainModules, advanced: advancedModules, listeningPractice, readingAndWriting } = allLanguageData[lang || 'en'].homePageModules;
-  const showAdvancedContent = progress.completedReviews[5];
+
+  // --- REMOVIDO CONDICIONAL EXTERNO --- As seções sempre são renderizadas.
 
   return (
     <div className="min-h-screen bg-black pb-20">
-        <PaymentRequiredModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} pixKey={"81 9 20011267"} pixName={"Ewerton David de Matos Gonçalo"} />
+        {/* Manteve o WarningModal, removeu PaymentRequiredModal se não for usado aqui */}
         <WarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} />
 
+        {/* Botão de Logout mantido */}
         <div className="absolute top-4 right-4 z-50">
             <button
             onClick={handleLogout}
@@ -109,40 +122,26 @@ const HomePage: React.FC = () => {
             <span className="hidden sm:inline">Sair</span>
             </button>
         </div>
+
+        {/* Banner mantido */}
         <section className="relative">
-            {lang === 'en' ? (
-                <picture>
-                <source
-                    media="(max-width: 768px)"
-                    srcSet="/images/visual/capa_en_cell.webp"
-                />
-                <img
-                    src="/images/visual/capa_en_pc.webp"
-                    alt="Banner Principal"
-                    className="w-full h-[40vh] md:h-[60vh] object-cover"
-                />
-                </picture>
-            ) : (
-                <img
-                src="https://i.imgur.com/ru9WoNh.jpg"
-                alt="Banner Principal"
-                className="w-full h-[40vh] md:h-[60vh] object-cover"
-                />
-            )}
+            {lang === 'en' ? ( /* ... código do banner ... */ <picture> <source media="(max-width: 768px)" srcSet="/images/visual/capa_en_cell.webp" /> <img src="/images/visual/capa_en_pc.webp" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" /> </picture>) : ( <img src="https://i.imgur.com/ru9WoNh.jpg" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" />)}
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         </section>
+
         <div className="container mx-auto px-4 py-16 max-w-7xl">
+            {/* --- Sessão 1 --- */}
             <section className="mb-12 md:mb-20">
-                {/* --- NOME DA SESSÃO 1 ATUALIZADO --- */}
-                <SectionTitle symbol="♥" lineGradient="from-pink-500 to-red-500">
+                <SectionTitle>
                     PRIMEIRA SESSÃO - VOCABULÁRIO:
                 </SectionTitle>
                 <ModuleCarousel
+                    // Passa a informação de bloqueio individual para cada módulo 1-5 baseada nos áudios
                     modules={mainModules.map(module => ({
                         ...module,
-                        isLocked: !progress.unlockedModules.includes(module.id) || 
-                                  (module.id === 1 && isModule1AudioLocked) || 
-                                  (module.id === 2 && isModule2AudioLocked) || 
+                        isLocked: !progress.unlockedModules.includes(module.id) ||
+                                  (module.id === 1 && isModule1AudioLocked) ||
+                                  (module.id === 2 && isModule2AudioLocked) ||
                                   (module.id === 3 && isModule3AudioLocked) ||
                                   (module.id === 4 && isModule4AudioLocked) ||
                                   (module.id === 5 && isModule5AudioLocked)
@@ -152,46 +151,54 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {showAdvancedContent && (
-            <>
-                {/* --- NOME DA SESSÃO 2 ATUALIZADO --- */}
-                <section className="mb-12 md:mb-20">
-                    <SectionTitle symbol="♣" lineGradient="from-green-400 to-cyan-500">
-                        SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
-                    </SectionTitle>
-                    <ModuleCarousel
-                        modules={advancedModules}
-                        sectionType="howto"
-                        onModuleClick={handleModuleClick}
-                    />
-                </section>
-                
-                {/* --- NOME DA SESSÃO 3 ATUALIZADO --- */}
-                <section className="mb-12 md:mb-20">
-                    <SectionTitle symbol="♦" lineGradient="from-blue-400 to-purple-500">
-                        TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
-                    </SectionTitle>
-                    <ModuleCarousel
-                        modules={listeningPractice}
-                        sectionType="bonus"
-                        onModuleClick={handleModuleClick}
-                    />
-                </section>
+            {/* --- Sessão 2 --- Renderizada sempre, mas módulos bloqueados/desbloqueados */}
+            <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
+                </SectionTitle>
+                <ModuleCarousel
+                    // Passa isLocked como true para TODOS os módulos se areAdvancedModulesUnlocked for false
+                    modules={advancedModules.map(module => ({
+                        ...module,
+                        isLocked: !areAdvancedModulesUnlocked
+                    }))}
+                    sectionType="howto"
+                    onModuleClick={handleModuleClick} // A lógica de clique agora diferencia bloqueado vs aviso
+                />
+            </section>
 
-                {/* --- NOME DA SESSÃO 4 ATUALIZADO --- */}
-                <section className="mb-12 md:mb-20">
-                    <SectionTitle symbol="♠" lineGradient="from-yellow-400 to-orange-500">
-                        QUARTA SESSÃO – LEITURA E ESCRITA:
-                    </SectionTitle>
-                    <ModuleCarousel
-                        modules={readingAndWriting}
-                        sectionType="course"
-                        onModuleClick={handleModuleClick}
-                    />
-                </section>
-            </>
-            )}
+            {/* --- Sessão 3 --- Renderizada sempre */}
+            <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={listeningPractice.map(module => ({
+                        ...module,
+                        isLocked: !areAdvancedModulesUnlocked
+                    }))}
+                    sectionType="bonus"
+                    onModuleClick={handleModuleClick}
+                />
+            </section>
+
+            {/* --- Sessão 4 --- Renderizada sempre */}
+            <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    QUARTA SESSÃO – LEITURA E ESCRITA:
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={readingAndWriting.map(module => ({
+                        ...module,
+                        isLocked: !areAdvancedModulesUnlocked
+                    }))}
+                    sectionType="course"
+                    onModuleClick={handleModuleClick}
+                />
+            </section>
+
         </div>
+        {/* Footer mantido */}
         <footer className="bg-gray-900 text-white py-12">
             <div className="container mx-auto px-4 text-center">
             <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
