@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
 
-  // Estado para controlar o vídeo de teste "end.mp4"
+  // Estado para controlar o player de vídeo
   const [isPlayingEndVideo, setIsPlayingEndVideo] = useState(false);
 
   const [isModule1AudioLocked, setIsModule1AudioLocked] = useState(false);
@@ -41,7 +41,6 @@ const HomePage: React.FC = () => {
         }
     };
 
-    // Lógica de áudio inicial mantida
     if (!currentProgress.hasPlayedIntro) {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
@@ -70,29 +69,30 @@ const HomePage: React.FC = () => {
   }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
-    // Verifica bloqueio por áudio para módulos 1-5
+    // 1. Verificações de bloqueio por áudio (Módulos 1-5)
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
-    // --- NOVA LÓGICA DO VÍDEO (TESTE) ---
-    // O ID 16 corresponde ao primeiro módulo da Terceira Sessão (Listening Practice)
+    // 2. AQUI ESTÁ A SOLUÇÃO: Verificamos o módulo 16 PRIMEIRO
+    // Se for o módulo 16 (Primeiro da Sessão 3), abrimos o vídeo e damos return.
+    // Isso impede que o código continue e abra o aviso (WarningModal).
     if (moduleId === 16) {
         setIsPlayingEndVideo(true);
         return;
     }
 
-    // --- LÓGICA ATUALIZADA PARA MÓDULOS AVANÇADOS ---
+    // 3. Só depois verificamos se é um módulo avançado (>= 6) para mostrar o aviso
     if (moduleId >= 6) {
       if (areAdvancedModulesUnlocked) {
-        setIsWarningOpen(true); // Se desbloqueado, mostra o aviso
+        setIsWarningOpen(true); // Isso mostra a imagem aviso.webp
       }
       return;
     }
 
-    // Lógica original para módulos 1-5 (verificação de desbloqueio sequencial)
+    // 4. Navegação padrão para módulos normais (1-5)
     const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
     if (!isUnlockedSequentially) {
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
@@ -113,24 +113,25 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black pb-20">
+        {/* Modal de Aviso (Imagem) */}
         <WarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} />
 
-        {/* --- COMPONENTE DE VÍDEO EM TELA CHEIA --- */}
+        {/* Player de Vídeo (Aparece só quando isPlayingEndVideo é true) */}
         {isPlayingEndVideo && (
             <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
                 <video 
                     src="/end.mp4" 
                     autoPlay 
                     className="w-full h-full object-contain"
-                    onEnded={() => setIsPlayingEndVideo(false)} // Fecha ao terminar
-                    // Sem a propriedade 'controls', a barra não aparece
+                    onEnded={() => setIsPlayingEndVideo(false)} // Fecha quando acaba
+                    // Sem controls = sem barra de tempo ou botões
                 >
                     Seu navegador não suporta vídeos.
                 </video>
             </div>
         )}
 
-        {/* Botão de Logout mantido */}
+        {/* Botão de Logout */}
         <div className="absolute top-4 right-4 z-50">
             <button
             onClick={handleLogout}
@@ -141,7 +142,7 @@ const HomePage: React.FC = () => {
             </button>
         </div>
 
-        {/* Banner mantido */}
+        {/* Banner */}
         <section className="relative">
             {lang === 'en' ? ( 
                 <picture> 
@@ -155,7 +156,7 @@ const HomePage: React.FC = () => {
         </section>
 
         <div className="container mx-auto px-4 py-16 max-w-7xl">
-            {/* --- Sessão 1 --- */}
+            {/* Sessão 1 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     PRIMEIRA SESSÃO - VOCABULÁRIO:
@@ -175,7 +176,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* --- Sessão 2 --- */}
+            {/* Sessão 2 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
@@ -190,7 +191,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* --- Sessão 3 --- */}
+            {/* Sessão 3 - Onde está o Módulo 16 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
@@ -205,7 +206,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* --- Sessão 4 --- */}
+            {/* Sessão 4 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     QUARTA SESSÃO – LEITURA E ESCRITA:
@@ -221,7 +222,7 @@ const HomePage: React.FC = () => {
             </section>
 
         </div>
-        {/* Footer mantido */}
+        
         <footer className="bg-gray-900 text-white py-12">
             <div className="container mx-auto px-4 text-center">
             <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
