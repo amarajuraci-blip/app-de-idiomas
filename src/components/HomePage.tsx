@@ -6,7 +6,6 @@ import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
 import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed, markAudio09AsPlayed, markAudio13AsPlayed } from '../utils/progress';
-// Removido PaymentRequiredModal se não for usado para esses módulos
 import WarningModal from './WarningModal';
 
 const HomePage: React.FC = () => {
@@ -14,8 +13,10 @@ const HomePage: React.FC = () => {
   const { lang } = useParams<{ lang: string }>();
   const progress = getProgress(lang || 'en');
 
-  // Removido isPaymentModalOpen se não for mais necessário aqui
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+
+  // Estado para controlar o vídeo de teste "end.mp4"
+  const [isPlayingEndVideo, setIsPlayingEndVideo] = useState(false);
 
   const [isModule1AudioLocked, setIsModule1AudioLocked] = useState(false);
   const [isModule2AudioLocked, setIsModule2AudioLocked] = useState(false);
@@ -23,8 +24,7 @@ const HomePage: React.FC = () => {
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
 
-  // --- NOVA LÓGICA ---
-  // Verifica se as sessões avançadas estão desbloqueadas (após completar módulo 5 da sessão 1)
+  // Verifica se as sessões avançadas estão desbloqueadas
   const areAdvancedModulesUnlocked = progress.completedReviews[5];
 
   useEffect(() => {
@@ -77,12 +77,18 @@ const HomePage: React.FC = () => {
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
+    // --- NOVA LÓGICA DO VÍDEO (TESTE) ---
+    // O ID 16 corresponde ao primeiro módulo da Terceira Sessão (Listening Practice)
+    if (moduleId === 16) {
+        setIsPlayingEndVideo(true);
+        return;
+    }
+
     // --- LÓGICA ATUALIZADA PARA MÓDULOS AVANÇADOS ---
     if (moduleId >= 6) {
       if (areAdvancedModulesUnlocked) {
         setIsWarningOpen(true); // Se desbloqueado, mostra o aviso
       }
-      // Se não estiver desbloqueado (areAdvancedModulesUnlocked é false), não faz nada (o clique já é prevenido no Carrossel)
       return;
     }
 
@@ -105,12 +111,24 @@ const HomePage: React.FC = () => {
 
   const { main: mainModules, advanced: advancedModules, listeningPractice, readingAndWriting } = allLanguageData[lang || 'en'].homePageModules;
 
-  // --- REMOVIDO CONDICIONAL EXTERNO --- As seções sempre são renderizadas.
-
   return (
     <div className="min-h-screen bg-black pb-20">
-        {/* Manteve o WarningModal, removeu PaymentRequiredModal se não for usado aqui */}
         <WarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} />
+
+        {/* --- COMPONENTE DE VÍDEO EM TELA CHEIA --- */}
+        {isPlayingEndVideo && (
+            <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+                <video 
+                    src="/end.mp4" 
+                    autoPlay 
+                    className="w-full h-full object-contain"
+                    onEnded={() => setIsPlayingEndVideo(false)} // Fecha ao terminar
+                    // Sem a propriedade 'controls', a barra não aparece
+                >
+                    Seu navegador não suporta vídeos.
+                </video>
+            </div>
+        )}
 
         {/* Botão de Logout mantido */}
         <div className="absolute top-4 right-4 z-50">
@@ -125,7 +143,14 @@ const HomePage: React.FC = () => {
 
         {/* Banner mantido */}
         <section className="relative">
-            {lang === 'en' ? ( /* ... código do banner ... */ <picture> <source media="(max-width: 768px)" srcSet="/images/visual/capa_en_cell.webp" /> <img src="/images/visual/capa_en_pc.webp" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" /> </picture>) : ( <img src="https://i.imgur.com/ru9WoNh.jpg" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" />)}
+            {lang === 'en' ? ( 
+                <picture> 
+                    <source media="(max-width: 768px)" srcSet="/images/visual/capa_en_cell.webp" /> 
+                    <img src="/images/visual/capa_en_pc.webp" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" /> 
+                </picture>
+            ) : ( 
+                <img src="https://i.imgur.com/ru9WoNh.jpg" alt="Banner Principal" className="w-full h-[40vh] md:h-[60vh] object-cover" />
+            )}
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         </section>
 
@@ -136,7 +161,6 @@ const HomePage: React.FC = () => {
                     PRIMEIRA SESSÃO - VOCABULÁRIO:
                 </SectionTitle>
                 <ModuleCarousel
-                    // Passa a informação de bloqueio individual para cada módulo 1-5 baseada nos áudios
                     modules={mainModules.map(module => ({
                         ...module,
                         isLocked: !progress.unlockedModules.includes(module.id) ||
@@ -151,23 +175,22 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* --- Sessão 2 --- Renderizada sempre, mas módulos bloqueados/desbloqueados */}
+            {/* --- Sessão 2 --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
                 </SectionTitle>
                 <ModuleCarousel
-                    // Passa isLocked como true para TODOS os módulos se areAdvancedModulesUnlocked for false
                     modules={advancedModules.map(module => ({
                         ...module,
                         isLocked: !areAdvancedModulesUnlocked
                     }))}
                     sectionType="howto"
-                    onModuleClick={handleModuleClick} // A lógica de clique agora diferencia bloqueado vs aviso
+                    onModuleClick={handleModuleClick}
                 />
             </section>
 
-            {/* --- Sessão 3 --- Renderizada sempre */}
+            {/* --- Sessão 3 --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
@@ -182,7 +205,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* --- Sessão 4 --- Renderizada sempre */}
+            {/* --- Sessão 4 --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     QUARTA SESSÃO – LEITURA E ESCRITA:
