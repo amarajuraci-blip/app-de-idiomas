@@ -1,5 +1,3 @@
-// src/utils/progress.ts
-
 export interface Progress {
   lastLessonCompleted: number;
   hasPlayedIntro: boolean;
@@ -11,12 +9,19 @@ export interface Progress {
   hasPlayedModule3Intro?: boolean;
   hasPlayedModule3Completion?: boolean;
   hasPlayedAudio09?: boolean;
-  hasPlayedAudio13?: boolean; // <-- NOVA PROPRIEDADE (Guia para o Módulo 5)
+  hasPlayedAudio13?: boolean;
   hasPlayedModule4Intro?: boolean;
   hasPlayedAudio11?: boolean;
   hasPlayedModule4Completion?: boolean;
   hasPlayedModule5Intro?: boolean;
   hasPlayedModule5Completion?: boolean;
+  
+  // Novos flags para os vídeos
+  hasWatchedVal1?: boolean;
+  hasWatchedPed1?: boolean;
+  hasWatchedVal2?: boolean;
+  hasWatchedPed2?: boolean;
+
   lessonUnlockTimes: { [key: number]: number };
   unlockedModules: number[];
   completedReviews: { [key: number]: boolean };
@@ -37,12 +42,18 @@ export const getProgress = (lang: string): Progress => {
       hasPlayedModule3Intro: false,
       hasPlayedModule3Completion: false,
       hasPlayedAudio09: false,
-      hasPlayedAudio13: false, // <-- VALOR PADRÃO
+      hasPlayedAudio13: false,
       hasPlayedModule4Intro: false,
       hasPlayedAudio11: false,
       hasPlayedModule4Completion: false,
       hasPlayedModule5Intro: false,
       hasPlayedModule5Completion: false,
+      
+      hasWatchedVal1: false,
+      hasWatchedPed1: false,
+      hasWatchedVal2: false,
+      hasWatchedPed2: false,
+
       lessonUnlockTimes: {},
       unlockedModules: [1],
       completedReviews: {},
@@ -60,12 +71,18 @@ export const getProgress = (lang: string): Progress => {
     hasPlayedModule3Intro: false,
     hasPlayedModule3Completion: false,
     hasPlayedAudio09: false,
-    hasPlayedAudio13: false, // <-- VALOR PADRÃO
+    hasPlayedAudio13: false,
     hasPlayedModule4Intro: false,
     hasPlayedAudio11: false,
     hasPlayedModule4Completion: false,
     hasPlayedModule5Intro: false,
     hasPlayedModule5Completion: false,
+    
+    hasWatchedVal1: false,
+    hasWatchedPed1: false,
+    hasWatchedVal2: false,
+    hasWatchedPed2: false,
+
     lessonUnlockTimes: {},
     unlockedModules: [1],
     completedReviews: {},
@@ -95,6 +112,8 @@ export const saveLessonProgress = (lang: string, lessonId: number) => {
         localStorage.setItem(progressKey, JSON.stringify(newProgress));
     }
 };
+
+// Funções de marcação de áudio existentes
 export const markIntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedIntro = true; saveProgress(lang, p); };
 export const markModule1IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule1Intro = true; saveProgress(lang, p); };
 export const markAudio03AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio03 = true; saveProgress(lang, p); };
@@ -109,12 +128,29 @@ export const markAudio11AsPlayed = (lang: string) => { const p = getProgress(lan
 export const markModule4CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule4Completion = true; saveProgress(lang, p); };
 export const markModule5IntroAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule5Intro = true; saveProgress(lang, p); };
 export const markModule5CompletionAsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedModule5Completion = true; saveProgress(lang, p); };
+export const markAudio13AsPlayed = (lang: string) => { const p = getProgress(lang); p.hasPlayedAudio13 = true; saveProgress(lang, p); };
 
-// <-- NOVA FUNÇÃO PARA MARCAR O ÁUDIO 13 -->
-export const markAudio13AsPlayed = (lang: string) => {
-  const currentProgress = getProgress(lang);
-  currentProgress.hasPlayedAudio13 = true;
-  saveProgress(lang, currentProgress);
+// Novas funções para marcar vídeos como assistidos
+export const markVideoAsWatched = (lang: string, videoKey: 'val1' | 'ped1' | 'val2' | 'ped2') => {
+    const p = getProgress(lang);
+    if (videoKey === 'val1') p.hasWatchedVal1 = true;
+    if (videoKey === 'ped1') p.hasWatchedPed1 = true;
+    if (videoKey === 'val2') p.hasWatchedVal2 = true;
+    if (videoKey === 'ped2') p.hasWatchedPed2 = true;
+    saveProgress(lang, p);
+};
+
+// Função para desbloquear módulos específicos
+export const unlockModules = (lang: string, moduleIds: number[]) => {
+    const p = getProgress(lang);
+    let changed = false;
+    moduleIds.forEach(id => {
+        if (!p.unlockedModules.includes(id)) {
+            p.unlockedModules.push(id);
+            changed = true;
+        }
+    });
+    if (changed) saveProgress(lang, p);
 };
 
 export const completeFirstReview = (lang: string, moduleId: number) => {
