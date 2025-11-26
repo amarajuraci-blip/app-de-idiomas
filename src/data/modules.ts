@@ -45,16 +45,13 @@ const englishData: LanguageData = {
       { id: 15, title: "Módulo Avançado 10", imageUrl: "/images/visual/m2_10.webp" },
     ],
     listeningPractice: [
+        // Reduzido para 6 módulos conforme solicitado
         { id: 16, title: "Treino 1", imageUrl: "/images/visual/m3_01.webp" },
         { id: 17, title: "Treino 2", imageUrl: "/images/visual/m3_02.webp" },
         { id: 18, title: "Treino 3", imageUrl: "/images/visual/m3_03.webp" },
         { id: 19, title: "Treino 4", imageUrl: "/images/visual/m3_04.webp" },
         { id: 20, title: "Treino 5", imageUrl: "/images/visual/m3_05.webp" },
         { id: 21, title: "Treino 6", imageUrl: "/images/visual/m3_06.webp" },
-        { id: 22, title: "Treino 7", imageUrl: "/images/visual/m3_07.webp" },
-        { id: 23, title: "Treino 8", imageUrl: "/images/visual/m3_08.webp" },
-        { id: 24, title: "Treino 9", imageUrl: "/images/visual/m3_09.webp" },
-        { id: 25, title: "Treino 10", imageUrl: "/images/visual/m3_10.webp" },
     ],
     readingAndWriting: [
       { id: 26, title: "Leitura 1", imageUrl: "/images/visual/m4_01.webp" },
@@ -68,7 +65,7 @@ const englishData: LanguageData = {
     {
       id: 1,
       title: "Aula 01: Primeiros Passos",
-      thumbnailUrl: "/images/visual/Thumbnail1.webp", // <-- ALTERAÇÃO AQUI
+      thumbnailUrl: "/images/visual/Thumbnail1.webp",
       cards: [
         { id: 101, portuguese: 'Sino', translation: 'Bell', imageUrl: '/images/aula1/Bell.webp', audioUrl: '/audio/ingles/aula1/bell.mp3' },
         { id: 102, portuguese: 'Bicicleta', translation: 'Bicycle', imageUrl: '/images/aula1/bicycle.webp', audioUrl: '/audio/ingles/aula1/bicycle.mp3' },
@@ -87,7 +84,7 @@ const englishData: LanguageData = {
     {
       id: 2,
       title: "Aula 02: Animais da Quinta",
-      thumbnailUrl: "/images/visual/Thumbnail2.webp", // <-- ALTERAÇÃO AQUI
+      thumbnailUrl: "/images/visual/Thumbnail2.webp",
       cards: [
         { id: 113, portuguese: 'Periquito', translation: 'Budgie', imageUrl: '/images/aula2/budgie.webp', audioUrl: '/audio/ingles/aula2/budgie.mp3' },
         { id: 114, portuguese: 'Touro', translation: 'Bull', imageUrl: '/images/aula2/bull.webp', audioUrl: '/audio/ingles/aula2/bull.mp3' },
@@ -106,7 +103,7 @@ const englishData: LanguageData = {
     {
       id: 3,
       title: "Aula 03: Frutas",
-      thumbnailUrl: "/images/visual/Thumbnail3.webp", // <-- ALTERAÇÃO AQUI
+      thumbnailUrl: "/images/visual/Thumbnail3.webp",
       cards: [
         { id: 125, portuguese: 'Maçã', translation: 'Apple', imageUrl: '/images/aula3/apple.webp', audioUrl: '/audio/ingles/aula3/apple.mp3' },
         { id: 126, portuguese: 'Abacate', translation: 'Avocado', imageUrl: '/images/aula3/avocado.webp', audioUrl: '/audio/ingles/aula3/avocado.mp3' },
