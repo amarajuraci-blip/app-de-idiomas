@@ -45,7 +45,7 @@ const englishData: LanguageData = {
       { id: 15, title: "Módulo Avançado 10", imageUrl: "/images/visual/m2_10.webp" },
     ],
     listeningPractice: [
-        // Reduzido para 6 módulos conforme solicitado
+        // Reduzido para 6 módulos
         { id: 16, title: "Treino 1", imageUrl: "/images/visual/m3_01.webp" },
         { id: 17, title: "Treino 2", imageUrl: "/images/visual/m3_02.webp" },
         { id: 18, title: "Treino 3", imageUrl: "/images/visual/m3_03.webp" },
@@ -62,6 +62,8 @@ const englishData: LanguageData = {
     ]
   },
   lessons: [
+    // ... (Mantenha o conteúdo das lições igual, sem alterações necessárias aqui)
+    // Se precisar que eu repita o bloco de lessons, me avise, mas você pode manter o que já tinha.
     {
       id: 1,
       title: "Aula 01: Primeiros Passos",
@@ -118,7 +120,7 @@ const englishData: LanguageData = {
         { id: 135, portuguese: 'Morango', translation: 'Strawberry', imageUrl: '/images/aula3/strawberry.webp', audioUrl: '/audio/ingles/aula3/strawberry.mp3' },
         { id: 136, portuguese: 'Melancia', translation: 'Watermelon', imageUrl: '/images/aula3/watermelon.webp', audioUrl: '/audio/ingles/aula3/watermelon.mp3' }
       ]
-    },
+    }
   ]
 };
 
