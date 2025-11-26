@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
 
-  // Estado para controlar o player de vídeo
+  // Estado para controlar o vídeo de teste "end.mp4"
   const [isPlayingEndVideo, setIsPlayingEndVideo] = useState(false);
 
   const [isModule1AudioLocked, setIsModule1AudioLocked] = useState(false);
@@ -41,6 +41,7 @@ const HomePage: React.FC = () => {
         }
     };
 
+    // Lógica de áudio inicial mantida
     if (!currentProgress.hasPlayedIntro) {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
@@ -69,30 +70,29 @@ const HomePage: React.FC = () => {
   }, [lang]);
 
   const handleModuleClick = (moduleId: number) => {
-    // 1. Verificações de bloqueio por áudio (Módulos 1-5)
+    // Verifica bloqueio por áudio para módulos 1-5
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
-    // 2. AQUI ESTÁ A SOLUÇÃO: Verificamos o módulo 16 PRIMEIRO
-    // Se for o módulo 16 (Primeiro da Sessão 3), abrimos o vídeo e damos return.
-    // Isso impede que o código continue e abra o aviso (WarningModal).
+    // --- LÓGICA DO VÍDEO (ID 16) ---
+    // Como trocamos as sessões, o módulo 16 agora está na "SEGUNDA SESSÃO"
     if (moduleId === 16) {
         setIsPlayingEndVideo(true);
         return;
     }
 
-    // 3. Só depois verificamos se é um módulo avançado (>= 6) para mostrar o aviso
+    // --- LÓGICA PARA MÓDULOS AVANÇADOS E DE TREINO (>= 6) ---
     if (moduleId >= 6) {
       if (areAdvancedModulesUnlocked) {
-        setIsWarningOpen(true); // Isso mostra a imagem aviso.webp
+        setIsWarningOpen(true); // Se desbloqueado, mostra o aviso (placeholder)
       }
       return;
     }
 
-    // 4. Navegação padrão para módulos normais (1-5)
+    // Lógica original para módulos 1-5
     const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
     if (!isUnlockedSequentially) {
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
@@ -113,18 +113,16 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black pb-20">
-        {/* Modal de Aviso (Imagem) */}
         <WarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} />
 
-        {/* Player de Vídeo (Aparece só quando isPlayingEndVideo é true) */}
+        {/* COMPONENTE DE VÍDEO EM TELA CHEIA */}
         {isPlayingEndVideo && (
             <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
                 <video 
                     src="/end.mp4" 
                     autoPlay 
                     className="w-full h-full object-contain"
-                    onEnded={() => setIsPlayingEndVideo(false)} // Fecha quando acaba
-                    // Sem controls = sem barra de tempo ou botões
+                    onEnded={() => setIsPlayingEndVideo(false)}
                 >
                     Seu navegador não suporta vídeos.
                 </video>
@@ -156,7 +154,7 @@ const HomePage: React.FC = () => {
         </section>
 
         <div className="container mx-auto px-4 py-16 max-w-7xl">
-            {/* Sessão 1 */}
+            {/* --- SESSÃO 1 (Mantida no topo) --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     PRIMEIRA SESSÃO - VOCABULÁRIO:
@@ -176,25 +174,10 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* Sessão 2 */}
+            {/* --- SESSÃO 2 (Antiga 3/Listening - Trocada de lugar e renomeada) --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
-                    SEGUNDA SESSÃO - FRASES E DIÁLOGOS:
-                </SectionTitle>
-                <ModuleCarousel
-                    modules={advancedModules.map(module => ({
-                        ...module,
-                        isLocked: !areAdvancedModulesUnlocked
-                    }))}
-                    sectionType="howto"
-                    onModuleClick={handleModuleClick}
-                />
-            </section>
-
-            {/* Sessão 3 - Onde está o Módulo 16 */}
-            <section className="mb-12 md:mb-20">
-                <SectionTitle>
-                    TERCEIRA SESSÃO – CONVERSAÇÃO NATURAL:
+                    SEGUNDA SESSÃO – CONVERSAÇÃO NATURAL:
                 </SectionTitle>
                 <ModuleCarousel
                     modules={listeningPractice.map(module => ({
@@ -206,7 +189,22 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* Sessão 4 */}
+            {/* --- SESSÃO 3 (Antiga 2/Advanced - Trocada de lugar e renomeada) --- */}
+            <section className="mb-12 md:mb-20">
+                <SectionTitle>
+                    TERCEIRA SESSÃO - FRASES E DIÁLOGOS:
+                </SectionTitle>
+                <ModuleCarousel
+                    modules={advancedModules.map(module => ({
+                        ...module,
+                        isLocked: !areAdvancedModulesUnlocked
+                    }))}
+                    sectionType="howto"
+                    onModuleClick={handleModuleClick}
+                />
+            </section>
+
+            {/* --- SESSÃO 4 (Mantida no final) --- */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>
                     QUARTA SESSÃO – LEITURA E ESCRITA:
