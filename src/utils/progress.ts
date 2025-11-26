@@ -1,3 +1,5 @@
+// src/utils/progress.ts
+
 export interface Progress {
   lastLessonCompleted: number;
   hasPlayedIntro: boolean;
