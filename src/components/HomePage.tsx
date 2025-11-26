@@ -33,7 +33,7 @@ const HomePage: React.FC = () => {
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
 
   // Verifica se o Módulo 5 da Sessão 1 foi completado
-  const isModule5Completed = progress.lastLessonCompleted >= 5; // Assumindo que lessonId 5 é o fim do Mod 5, ou use unlockedModules
+  const isModule5Completed = progress.lastLessonCompleted >= 5; 
 
   useEffect(() => {
     if (!lang) return;
@@ -60,7 +60,7 @@ const HomePage: React.FC = () => {
         }, 14000);
     }
     
-    // Lógica dos outros áudios (mantida)
+    // Lógica dos outros áudios
     if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
         setIsModule2AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_03.mp3', markAudio03AsPlayed);
@@ -160,9 +160,8 @@ const HomePage: React.FC = () => {
     // --- SESSÃO 3 (Advanced - IDs 6 a 15) ---
     if (moduleId >= 6 && moduleId <= 15) {
         // Mantém bloqueado/aviso se não estiver liberado
-        // Por enquanto, vamos supor que libera com o Mod 5 também
         if (progress.unlockedModules.includes(5)) {
-             setIsWarningOpen(true); // Placeholder
+             setIsWarningOpen(true);
         }
         return;
     }
@@ -278,13 +277,14 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* POSIÇÃO 4: SESSÃO 4 (LEITURA - Mantida) */}
+            {/* POSIÇÃO 4: SESSÃO 4 (LEITURA - CORRIGIDO) */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>QUARTA SESSÃO – LEITURA E ESCRITA:</SectionTitle>
                 <ModuleCarousel
                     modules={readingAndWriting.map(module => ({
                         ...module,
-                        isLocked: !areAdvancedModulesUnlocked // Mantido como estava
+                        // CORREÇÃO AQUI: Verifica se o módulo 5 já foi desbloqueado/completado
+                        isLocked: !progress.unlockedModules.includes(5)
                     }))}
                     sectionType="course"
                     onModuleClick={handleModuleClick}
