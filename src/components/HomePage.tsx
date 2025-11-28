@@ -6,22 +6,25 @@ import SectionTitle from './SectionTitle';
 import ModuleCarousel from './ModuleCarousel';
 import { allLanguageData } from '../data/modules';
 import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed, markAudio09AsPlayed, markAudio13AsPlayed, markVideoAsWatched, unlockModules } from '../utils/progress';
-import WarningModal from './WarningModal';
 import LockedModal from './LockedModal';
-import PaymentRequiredModal from './PaymentRequiredModal';
+import PremiumModal from './PremiumModal'; 
+// OBS: Certifique-se de que PaymentRequiredModal não está sendo importado se não for usado, ou remova a importação
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
   const progress = getProgress(lang || 'en');
 
-  // Modais
-  const [isWarningOpen, setIsWarningOpen] = useState(false);
+  // --- MODAIS ---
+  // Modal Roxo de aviso (mensagem simples)
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [lockedModalContent, setLockedModalContent] = useState({ title: '', message: '', buttonText: 'OK', onAction: () => {} });
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
+  // NOVO Modal Premium (Pagamento + Senha)
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [premiumPrice, setPremiumPrice] = useState('R$ 29,90'); 
 
-  // Vídeo
+  // --- VÍDEO ---
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
   const [currentVideoKey, setCurrentVideoKey] = useState<'val1' | 'ped1' | 'val2' | 'ped2' | null>(null);
 
@@ -31,9 +34,6 @@ const HomePage: React.FC = () => {
   const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
-
-  // Verifica se o Módulo 5 da Sessão 1 foi completado
-  const isModule5Completed = progress.lastLessonCompleted >= 5; 
 
   useEffect(() => {
     if (!lang) return;
@@ -53,10 +53,10 @@ const HomePage: React.FC = () => {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
         
-        // --- LÓGICA DE DESBLOQUEIO POR TEMPO (SESSÃO 2: IDs 16 e 17) ---
+        // LÓGICA DE DESBLOQUEIO POR TEMPO (SESSÃO 2: IDs 16 e 17)
         setTimeout(() => {
             setIsModule1AudioLocked(false);
-            unlockModules(lang, [16, 17]); // Desbloqueia visualmente os módulos da Sessão 2
+            unlockModules(lang, [16, 17]);
         }, 14000);
     }
     
@@ -89,11 +89,10 @@ const HomePage: React.FC = () => {
         return;
     }
 
-    // Marca como assistido
     markVideoAsWatched(lang, currentVideoKey);
-    setCurrentVideoUrl(null); // Fecha o vídeo
+    setCurrentVideoUrl(null);
 
-    // Se for vídeo da fase 2 (Pós-Módulo 5), abre o modal lilás
+    // Se for vídeo da fase 2 (Pós-Módulo 5), abre o modal roxo, que depois leva ao Premium
     if (currentVideoKey === 'val2' || currentVideoKey === 'ped2') {
         setLockedModalContent({
             title: 'Vamos praticar!',
@@ -101,7 +100,8 @@ const HomePage: React.FC = () => {
             buttonText: 'INICIAR',
             onAction: () => {
                 setIsLockedModalOpen(false);
-                setIsPaymentModalOpen(true); // Abre pagamento
+                setPremiumPrice('R$ 19,90');
+                setIsPremiumModalOpen(true); // Abre o Modal Premium
             }
         });
         setIsLockedModalOpen(true);
@@ -120,8 +120,8 @@ const HomePage: React.FC = () => {
 
     // --- SESSÃO 2 (Conversation - IDs 16 e 17) ---
     if (moduleId === 16 || moduleId === 17) {
-        // Se o módulo 5 NÃO foi completado
-        if (!progress.unlockedModules.includes(5)) { // Usando unlockedModules para garantir
+        // FASE 1: Módulo 5 NÃO completado
+        if (!progress.unlockedModules.includes(5)) { 
             const videoKey = moduleId === 16 ? 'val1' : 'ped1';
             const hasWatched = moduleId === 16 ? progress.hasWatchedVal1 : progress.hasWatchedPed1;
 
@@ -129,7 +129,7 @@ const HomePage: React.FC = () => {
                 setCurrentVideoKey(videoKey);
                 setCurrentVideoUrl(`/${videoKey}.mp4`);
             } else {
-                // Já viu, mostra bloqueio
+                // Já viu, mostra mensagem de bloqueio
                 setLockedModalContent({
                     title: 'Acesso Restrito',
                     message: 'Conclua os 5 módulos acima para liberar todos os recursos de conversação.',
@@ -141,7 +141,7 @@ const HomePage: React.FC = () => {
             return;
         } 
         
-        // Se o módulo 5 JÁ foi completado (Fase 2)
+        // FASE 2: Módulo 5 JÁ completado
         else {
             const videoKey = moduleId === 16 ? 'val2' : 'ped2';
             const hasWatched = moduleId === 16 ? progress.hasWatchedVal2 : progress.hasWatchedPed2;
@@ -150,28 +150,26 @@ const HomePage: React.FC = () => {
                 setCurrentVideoKey(videoKey);
                 setCurrentVideoUrl(`/${videoKey}.mp4`);
             } else {
-                // Já viu o vídeo novo, vai direto para pagamento
-                setIsPaymentModalOpen(true);
+                // Já viu o vídeo novo, abre direto o modal Premium
+                setPremiumPrice('R$ 19,90');
+                setIsPremiumModalOpen(true);
             }
             return;
         }
     }
 
-    // --- SESSÃO 3 (Advanced - IDs 6 a 15) ---
-    if (moduleId >= 6 && moduleId <= 15) {
-        // Mantém bloqueado/aviso se não estiver liberado
-        if (progress.unlockedModules.includes(5)) {
-             setIsWarningOpen(true);
-        }
+    // --- SESSÃO 3 e 4 (Advanced e Reading) ---
+    // Se clicar, abre o Modal Premium
+    if ((moduleId >= 6 && moduleId <= 15) || (moduleId >= 26)) {
+        setPremiumPrice('R$ 29,90'); 
+        setIsPremiumModalOpen(true);
         return;
     }
 
     // Navegação normal para Sessão 1
     const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
     if (!isUnlockedSequentially) {
-      // Se for ID 16/17 e ainda não tiver liberado pelo tempo (raro, mas possível)
       if (moduleId === 16 || moduleId === 17) return; 
-      
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
       return;
     }
@@ -190,8 +188,8 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black pb-20">
-        <WarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} />
         
+        {/* Modal Simples Roxo */}
         <LockedModal 
             isOpen={isLockedModalOpen} 
             onClose={() => setIsLockedModalOpen(false)}
@@ -201,11 +199,12 @@ const HomePage: React.FC = () => {
             buttonText={lockedModalContent.buttonText}
         />
 
-        <PaymentRequiredModal 
-            isOpen={isPaymentModalOpen} 
-            onClose={() => setIsPaymentModalOpen(false)}
-            pixKey="81920011267"
-            pixName="Ewerton David de Matos Gonçalo - R$19,90 (Inglês) ou R$29,90 (Todos)"
+        {/* NOVO Modal Premium (Com senha e timer) */}
+        <PremiumModal 
+            isOpen={isPremiumModalOpen} 
+            onClose={() => setIsPremiumModalOpen(false)}
+            pixKey="81995148260"
+            price={premiumPrice}
         />
 
         {/* Player de Vídeo */}
@@ -236,7 +235,7 @@ const HomePage: React.FC = () => {
         </section>
 
         <div className="container mx-auto px-4 py-16 max-w-7xl">
-            {/* POSIÇÃO 1: SESSÃO 1 (VOCABULÁRIO) */}
+            {/* SESSÃO 1 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>PRIMEIRA SESSÃO - VOCABULÁRIO:</SectionTitle>
                 <ModuleCarousel
@@ -249,13 +248,12 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* POSIÇÃO 2: SESSÃO 2 (ANTIGA CONVERSAÇÃO - IDs 16+) */}
+            {/* SESSÃO 2 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>SEGUNDA SESSÃO – CONVERSAÇÃO NATURAL:</SectionTitle>
                 <ModuleCarousel
                     modules={listeningPractice.map(module => ({
                         ...module,
-                        // Desbloqueia se estiver na lista de desbloqueados (16 e 17 entram via timeout)
                         isLocked: !progress.unlockedModules.includes(module.id)
                     }))}
                     sectionType="bonus"
@@ -263,28 +261,26 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* POSIÇÃO 3: SESSÃO 3 (ANTIGA AVANÇADO - IDs 6+) */}
+            {/* SESSÃO 3 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>TERCEIRA SESSÃO - FRASES E DIÁLOGOS:</SectionTitle>
                 <ModuleCarousel
                     modules={advancedModules.map(module => ({
                         ...module,
-                        // Bloqueado até segunda ordem (ou até mod 5 ser feito)
-                        isLocked: !progress.unlockedModules.includes(5) 
+                        isLocked: true 
                     }))}
                     sectionType="howto"
                     onModuleClick={handleModuleClick}
                 />
             </section>
 
-            {/* POSIÇÃO 4: SESSÃO 4 (LEITURA - CORRIGIDO) */}
+            {/* SESSÃO 4 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>QUARTA SESSÃO – LEITURA E ESCRITA:</SectionTitle>
                 <ModuleCarousel
                     modules={readingAndWriting.map(module => ({
                         ...module,
-                        // CORREÇÃO AQUI: Verifica se o módulo 5 já foi desbloqueado/completado
-                        isLocked: !progress.unlockedModules.includes(5)
+                        isLocked: true
                     }))}
                     sectionType="course"
                     onModuleClick={handleModuleClick}
