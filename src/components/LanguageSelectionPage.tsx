@@ -48,12 +48,11 @@ const LanguageSelectionPage: React.FC = () => {
     <div className="min-h-screen bg-black text-white flex flex-col justify-center">
       <FirstTimeModal isOpen={isFirstTimeModalOpen} onClose={handleCloseFirstTimeModal} />
       
-      {/* O modal agora controla internamente se mostra pagamento ou temporizador */}
       <PremiumModal 
         isOpen={isPremiumModalOpen} 
         onClose={() => setIsPremiumModalOpen(false)}
         pixKey="81995148260"
-        price="R$ 29,90"
+        price="R$ 29,90" // Preço para o pacote completo na seleção de idiomas
       />
 
       <div className="container mx-auto px-4 py-16 max-w-6xl text-center">
