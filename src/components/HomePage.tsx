@@ -14,13 +14,16 @@ const HomePage: React.FC = () => {
   const { lang } = useParams<{ lang: string }>();
   const progress = getProgress(lang || 'en');
 
-  // Modais
+  // --- MODAIS ---
+  // Modal Roxo de aviso (Mensagem Simples)
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [lockedModalContent, setLockedModalContent] = useState({ title: '', message: '', buttonText: 'OK', onAction: () => {} });
+  
+  // Modal Premium (Pagamento + Senha)
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [premiumPrice, setPremiumPrice] = useState('R$ 29,90'); 
 
-  // Vídeo
+  // --- VÍDEO ---
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
   const [currentVideoKey, setCurrentVideoKey] = useState<'val1' | 'ped1' | 'val2' | 'ped2' | null>(null);
 
@@ -30,6 +33,9 @@ const HomePage: React.FC = () => {
   const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
+
+  // Verifica se o Módulo 5 da Sessão 1 foi concluído (Chave mestra para liberar tudo visualmente)
+  const isMod5Finished = progress.completedReviews[5];
 
   useEffect(() => {
     if (!lang) return;
@@ -49,12 +55,14 @@ const HomePage: React.FC = () => {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
         
+        // LÓGICA DE DESBLOQUEIO POR TEMPO (Apenas SESSÃO 2: IDs 16 e 17)
         setTimeout(() => {
             setIsModule1AudioLocked(false);
             unlockModules(lang, [16, 17]);
         }, 14000);
     }
     
+    // Lógica dos outros áudios
     if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
         setIsModule2AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_03.mp3', markAudio03AsPlayed);
@@ -86,7 +94,7 @@ const HomePage: React.FC = () => {
     markVideoAsWatched(lang, currentVideoKey);
     setCurrentVideoUrl(null);
 
-    // Fim do vídeo da fase 2: Modal Roxo -> Modal Premium
+    // Se for vídeo da fase 2, abre o modal roxo -> Premium
     if (currentVideoKey === 'val2' || currentVideoKey === 'ped2') {
         setLockedModalContent({
             title: 'Vamos praticar!',
@@ -105,70 +113,89 @@ const HomePage: React.FC = () => {
   };
 
   const handleModuleClick = (moduleId: number) => {
-    // 1. Bloqueios de áudio (Sessão 1)
+    // 1. Bloqueios de áudio da Sessão 1
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
-    // --- SESSÃO 2 (Conversation - IDs 16 e 17) ---
-    if (moduleId === 16 || moduleId === 17) {
-        // Se já é premium, mostra o temporizador direto
-        if (localStorage.getItem('isPremium') === 'true') {
-             setPremiumPrice('R$ 19,90');
-             setIsPremiumModalOpen(true);
-             return;
+    // Se já é premium, o modal Premium controla o acesso (mostra o timer),
+    // mas aqui você pode decidir se quer liberar navegação real ou mostrar timer.
+    // Pela lógica atual, vamos focar em abrir o modal se for conteúdo restrito.
+    const isPremium = localStorage.getItem('isPremium') === 'true';
+
+    // --- SESSÃO 2 (IDs 16 a 21) ---
+    if (moduleId >= 16 && moduleId <= 21) {
+        
+        // Módulos 1 e 2 da Sessão 2 (Vídeos Especiais)
+        if (moduleId === 16 || moduleId === 17) {
+            if (isPremium) {
+                setPremiumPrice('R$ 19,90');
+                setIsPremiumModalOpen(true); // Mostra timer
+                return;
+            }
+
+            // FASE 1: Antes de terminar Mod 5
+            if (!isMod5Finished) { 
+                const videoKey = moduleId === 16 ? 'val1' : 'ped1';
+                const hasWatched = moduleId === 16 ? progress.hasWatchedVal1 : progress.hasWatchedPed1;
+
+                if (!hasWatched) {
+                    setCurrentVideoKey(videoKey);
+                    setCurrentVideoUrl(`/${videoKey}.mp4`);
+                } else {
+                    setLockedModalContent({
+                        title: 'Acesso Restrito',
+                        message: 'Conclua os 5 módulos acima para liberar todos os recursos de conversação.',
+                        buttonText: 'OK',
+                        onAction: () => setIsLockedModalOpen(false)
+                    });
+                    setIsLockedModalOpen(true);
+                }
+                return;
+            } 
+            
+            // FASE 2: Mod 5 Concluído
+            else {
+                const videoKey = moduleId === 16 ? 'val2' : 'ped2';
+                const hasWatched = moduleId === 16 ? progress.hasWatchedVal2 : progress.hasWatchedPed2;
+
+                if (!hasWatched) {
+                    setCurrentVideoKey(videoKey);
+                    setCurrentVideoUrl(`/${videoKey}.mp4`);
+                } else {
+                    setPremiumPrice('R$ 19,90');
+                    setIsPremiumModalOpen(true);
+                }
+                return;
+            }
         }
 
-        // FASE 1: Módulo 5 NÃO completado
-        if (!progress.unlockedModules.includes(5)) { 
-            const videoKey = moduleId === 16 ? 'val1' : 'ped1';
-            const hasWatched = moduleId === 16 ? progress.hasWatchedVal1 : progress.hasWatchedPed1;
-
-            if (!hasWatched) {
-                setCurrentVideoKey(videoKey);
-                setCurrentVideoUrl(`/${videoKey}.mp4`);
-            } else {
-                setLockedModalContent({
-                    title: 'Acesso Restrito',
-                    message: 'Conclua os 5 módulos acima para liberar todos os recursos de conversação.',
-                    buttonText: 'OK',
-                    onAction: () => setIsLockedModalOpen(false)
-                });
-                setIsLockedModalOpen(true);
-            }
-            return;
-        } 
-        
-        // FASE 2: Módulo 5 JÁ completado
-        else {
-            const videoKey = moduleId === 16 ? 'val2' : 'ped2';
-            const hasWatched = moduleId === 16 ? progress.hasWatchedVal2 : progress.hasWatchedPed2;
-
-            if (!hasWatched) {
-                setCurrentVideoKey(videoKey);
-                setCurrentVideoUrl(`/${videoKey}.mp4`);
-            } else {
-                // Já viu o vídeo novo, abre modal Premium
-                setPremiumPrice('R$ 19,90');
+        // Módulos 3, 4, 5, 6 da Sessão 2 (Restantes)
+        if (moduleId >= 18) {
+            if (isMod5Finished) {
+                setPremiumPrice('R$ 29,90');
                 setIsPremiumModalOpen(true);
             }
+            // Se Mod 5 não terminou, não faz nada (isLocked=true impede o clique no Carousel)
             return;
         }
     }
 
-    // --- SESSÃO 3 e 4 (Advanced e Reading) ---
+    // --- SESSÃO 3 (IDs 6-15) e SESSÃO 4 (IDs 26-30) ---
     if ((moduleId >= 6 && moduleId <= 15) || (moduleId >= 26)) {
-        setPremiumPrice('R$ 29,90'); 
-        setIsPremiumModalOpen(true);
+        if (isMod5Finished) {
+            setPremiumPrice('R$ 29,90'); 
+            setIsPremiumModalOpen(true);
+        }
         return;
     }
 
-    // Navegação normal para Sessão 1
+    // --- SESSÃO 1 (Navegação Normal) ---
     const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
     if (!isUnlockedSequentially) {
-      if (moduleId === 16 || moduleId === 17) return; 
+      if (moduleId === 16 || moduleId === 17) return; // Exceção para o timer
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
       return;
     }
@@ -250,33 +277,37 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={listeningPractice.map(module => ({
                         ...module,
-                        isLocked: !progress.unlockedModules.includes(module.id)
+                        // Se Mod 5 terminou, TODOS liberados visualmente.
+                        // Se não, só os que estão na lista 'unlockedModules' (16 e 17 via timer).
+                        isLocked: isMod5Finished ? false : !progress.unlockedModules.includes(module.id)
                     }))}
                     sectionType="bonus"
                     onModuleClick={handleModuleClick}
                 />
             </section>
 
-            {/* SESSÃO 3 (Advanced) */}
+            {/* SESSÃO 3 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>TERCEIRA SESSÃO - FRASES E DIÁLOGOS:</SectionTitle>
                 <ModuleCarousel
                     modules={advancedModules.map(module => ({
                         ...module,
-                        isLocked: true 
+                        // Libera visualmente se Mod 5 terminou
+                        isLocked: !isMod5Finished
                     }))}
                     sectionType="howto"
                     onModuleClick={handleModuleClick}
                 />
             </section>
 
-            {/* SESSÃO 4 (Reading) */}
+            {/* SESSÃO 4 */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>QUARTA SESSÃO – LEITURA E ESCRITA:</SectionTitle>
                 <ModuleCarousel
                     modules={readingAndWriting.map(module => ({
                         ...module,
-                        isLocked: true
+                        // Libera visualmente se Mod 5 terminou
+                        isLocked: !isMod5Finished
                     }))}
                     sectionType="course"
                     onModuleClick={handleModuleClick}
