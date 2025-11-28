@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LockKeyhole, Copy, Check, ChevronRight, Unlock } from 'lucide-react';
+import { X, LockKeyhole, Copy, Check, Unlock } from 'lucide-react';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -15,12 +15,17 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number}>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Data Alvo: 01 de Dezembro de 2025
   const targetDate = new Date('2025-12-01T00:00:00');
 
   useEffect(() => {
     if (isOpen) {
-      setView('payment'); // Reseta para pagamento ao abrir
+      // VERIFICAÇÃO DE PERSISTÊNCIA
+      const isPremium = localStorage.getItem('isPremium') === 'true';
+      if (isPremium) {
+        setView('timer'); // Se já for premium, vai direto para o cronômetro
+      } else {
+        setView('payment'); // Se não, começa no pagamento
+      }
       setPassword('');
       setError('');
     }
@@ -59,9 +64,8 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
 
   const handlePasswordSubmit = () => {
     if (password === '4708') {
+      localStorage.setItem('isPremium', 'true'); // SALVA A PERSISTÊNCIA
       setView('timer');
-      // Aqui você poderia salvar no localStorage que o usuário é premium, se quisesse
-      localStorage.setItem('isPremium', 'true'); 
     } else {
       setError('Senha Inválida');
       setTimeout(() => setError(''), 2000);
@@ -93,7 +97,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
               Libere o acesso completo a todos os idiomas e módulos avançados.
             </p>
 
-            <div className="bg-[#1c1c2b] rounded-xl p-4 mb-4 flex items-center justify-between border border-gray-800">
+            <div className="bg-[#1c1c2b] rounded-xl p-4 mb-6 flex items-center justify-between border border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <p className="text-white font-semibold text-sm">Chave Pix (Celular)</p>
@@ -109,16 +113,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
               </button>
             </div>
 
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-purple-700/30 mb-4">
-              Confirmar Pagamento de {price}
-            </button>
-
+            {/* BOTÃO ÚNICO QUE LEVA PARA A SENHA */}
             <button 
               onClick={() => setView('password')}
-              className="text-purple-400 hover:text-purple-300 text-sm underline flex items-center justify-center mx-auto"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-purple-700/30"
             >
-              Eu já paguei
-              <ChevronRight size={14} />
+              Confirmar Pagamento de {price}
             </button>
           </>
         )}
@@ -160,7 +160,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
           </>
         )}
 
-        {/* --- VISTA 3: TEMPORIZADOR --- */}
+        {/* --- VISTA 3: TEMPORIZADOR (PERSISTENTE) --- */}
         {view === 'timer' && (
           <>
             <div className="flex justify-center mb-6">
