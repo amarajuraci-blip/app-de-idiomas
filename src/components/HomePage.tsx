@@ -15,13 +15,13 @@ const HomePage: React.FC = () => {
   const progress = getProgress(lang || 'en');
 
   // --- MODAIS ---
-  // Modal Roxo de aviso (Mensagem Simples)
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [lockedModalContent, setLockedModalContent] = useState({ title: '', message: '', buttonText: 'OK', onAction: () => {} });
   
-  // Modal Premium (Pagamento + Senha)
+  // Modal Premium
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [premiumPrice, setPremiumPrice] = useState('R$ 29,90'); 
+  // CORREÇÃO: Preço da Home definido fixo como 19,90
+  const [premiumPrice, setPremiumPrice] = useState('R$ 19,90'); 
 
   // --- VÍDEO ---
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
@@ -34,7 +34,6 @@ const HomePage: React.FC = () => {
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
 
-  // Verifica se o Módulo 5 da Sessão 1 foi concluído (Chave mestra para liberar tudo visualmente)
   const isMod5Finished = progress.completedReviews[5];
 
   useEffect(() => {
@@ -55,14 +54,12 @@ const HomePage: React.FC = () => {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
         
-        // LÓGICA DE DESBLOQUEIO POR TEMPO (Apenas SESSÃO 2: IDs 16 e 17)
         setTimeout(() => {
             setIsModule1AudioLocked(false);
             unlockModules(lang, [16, 17]);
         }, 14000);
     }
     
-    // Lógica dos outros áudios
     if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
         setIsModule2AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_03.mp3', markAudio03AsPlayed);
@@ -102,7 +99,7 @@ const HomePage: React.FC = () => {
             buttonText: 'INICIAR',
             onAction: () => {
                 setIsLockedModalOpen(false);
-                setPremiumPrice('R$ 19,90');
+                setPremiumPrice('R$ 19,90'); // Garante o preço da Home
                 setIsPremiumModalOpen(true); 
             }
         });
@@ -120,9 +117,7 @@ const HomePage: React.FC = () => {
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
-    // Se já é premium, o modal Premium controla o acesso (mostra o timer),
-    // mas aqui você pode decidir se quer liberar navegação real ou mostrar timer.
-    // Pela lógica atual, vamos focar em abrir o modal se for conteúdo restrito.
+    // Se já é premium, o modal abre direto no temporizador (controlado pelo componente PremiumModal)
     const isPremium = localStorage.getItem('isPremium') === 'true';
 
     // --- SESSÃO 2 (IDs 16 a 21) ---
@@ -132,7 +127,7 @@ const HomePage: React.FC = () => {
         if (moduleId === 16 || moduleId === 17) {
             if (isPremium) {
                 setPremiumPrice('R$ 19,90');
-                setIsPremiumModalOpen(true); // Mostra timer
+                setIsPremiumModalOpen(true);
                 return;
             }
 
@@ -165,7 +160,7 @@ const HomePage: React.FC = () => {
                     setCurrentVideoKey(videoKey);
                     setCurrentVideoUrl(`/${videoKey}.mp4`);
                 } else {
-                    setPremiumPrice('R$ 19,90');
+                    setPremiumPrice('R$ 19,90'); // Garante o preço da Home
                     setIsPremiumModalOpen(true);
                 }
                 return;
@@ -175,10 +170,9 @@ const HomePage: React.FC = () => {
         // Módulos 3, 4, 5, 6 da Sessão 2 (Restantes)
         if (moduleId >= 18) {
             if (isMod5Finished) {
-                setPremiumPrice('R$ 29,90');
+                setPremiumPrice('R$ 19,90'); // Garante o preço da Home
                 setIsPremiumModalOpen(true);
             }
-            // Se Mod 5 não terminou, não faz nada (isLocked=true impede o clique no Carousel)
             return;
         }
     }
@@ -186,7 +180,7 @@ const HomePage: React.FC = () => {
     // --- SESSÃO 3 (IDs 6-15) e SESSÃO 4 (IDs 26-30) ---
     if ((moduleId >= 6 && moduleId <= 15) || (moduleId >= 26)) {
         if (isMod5Finished) {
-            setPremiumPrice('R$ 29,90'); 
+            setPremiumPrice('R$ 19,90'); // CORREÇÃO: Preço da Home aqui também
             setIsPremiumModalOpen(true);
         }
         return;
@@ -195,7 +189,7 @@ const HomePage: React.FC = () => {
     // --- SESSÃO 1 (Navegação Normal) ---
     const isUnlockedSequentially = progress.unlockedModules.includes(moduleId);
     if (!isUnlockedSequentially) {
-      if (moduleId === 16 || moduleId === 17) return; // Exceção para o timer
+      if (moduleId === 16 || moduleId === 17) return; 
       alert(`Complete o módulo ${moduleId - 1} para desbloquear este!`);
       return;
     }
@@ -277,9 +271,7 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={listeningPractice.map(module => ({
                         ...module,
-                        // Se Mod 5 terminou, TODOS liberados visualmente.
-                        // Se não, só os que estão na lista 'unlockedModules' (16 e 17 via timer).
-                        isLocked: isMod5Finished ? false : !progress.unlockedModules.includes(module.id)
+                        isLocked: !progress.unlockedModules.includes(module.id)
                     }))}
                     sectionType="bonus"
                     onModuleClick={handleModuleClick}
@@ -292,8 +284,7 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={advancedModules.map(module => ({
                         ...module,
-                        // Libera visualmente se Mod 5 terminou
-                        isLocked: !isMod5Finished
+                        isLocked: true 
                     }))}
                     sectionType="howto"
                     onModuleClick={handleModuleClick}
@@ -306,8 +297,7 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={readingAndWriting.map(module => ({
                         ...module,
-                        // Libera visualmente se Mod 5 terminou
-                        isLocked: !isMod5Finished
+                        isLocked: true
                     }))}
                     sectionType="course"
                     onModuleClick={handleModuleClick}
