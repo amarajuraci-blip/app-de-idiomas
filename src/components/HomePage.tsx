@@ -8,23 +8,19 @@ import { allLanguageData } from '../data/modules';
 import { getProgress, markIntroAsPlayed, markAudio03AsPlayed, markAudio06AsPlayed, markAudio09AsPlayed, markAudio13AsPlayed, markVideoAsWatched, unlockModules } from '../utils/progress';
 import LockedModal from './LockedModal';
 import PremiumModal from './PremiumModal'; 
-// OBS: Certifique-se de que PaymentRequiredModal não está sendo importado se não for usado, ou remova a importação
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
   const progress = getProgress(lang || 'en');
 
-  // --- MODAIS ---
-  // Modal Roxo de aviso (mensagem simples)
+  // Modais
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [lockedModalContent, setLockedModalContent] = useState({ title: '', message: '', buttonText: 'OK', onAction: () => {} });
-  
-  // NOVO Modal Premium (Pagamento + Senha)
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [premiumPrice, setPremiumPrice] = useState('R$ 29,90'); 
 
-  // --- VÍDEO ---
+  // Vídeo
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
   const [currentVideoKey, setCurrentVideoKey] = useState<'val1' | 'ped1' | 'val2' | 'ped2' | null>(null);
 
@@ -53,14 +49,12 @@ const HomePage: React.FC = () => {
         setIsModule1AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_01.mp3', markIntroAsPlayed);
         
-        // LÓGICA DE DESBLOQUEIO POR TEMPO (SESSÃO 2: IDs 16 e 17)
         setTimeout(() => {
             setIsModule1AudioLocked(false);
             unlockModules(lang, [16, 17]);
         }, 14000);
     }
     
-    // Lógica dos outros áudios
     if (currentProgress.lastLessonCompleted >= 1 && !currentProgress.hasPlayedAudio03) {
         setIsModule2AudioLocked(true);
         playAndMark('/audio/narrations/ingles/audio_03.mp3', markAudio03AsPlayed);
@@ -92,7 +86,7 @@ const HomePage: React.FC = () => {
     markVideoAsWatched(lang, currentVideoKey);
     setCurrentVideoUrl(null);
 
-    // Se for vídeo da fase 2 (Pós-Módulo 5), abre o modal roxo, que depois leva ao Premium
+    // Fim do vídeo da fase 2: Modal Roxo -> Modal Premium
     if (currentVideoKey === 'val2' || currentVideoKey === 'ped2') {
         setLockedModalContent({
             title: 'Vamos praticar!',
@@ -101,7 +95,7 @@ const HomePage: React.FC = () => {
             onAction: () => {
                 setIsLockedModalOpen(false);
                 setPremiumPrice('R$ 19,90');
-                setIsPremiumModalOpen(true); // Abre o Modal Premium
+                setIsPremiumModalOpen(true); 
             }
         });
         setIsLockedModalOpen(true);
@@ -120,6 +114,13 @@ const HomePage: React.FC = () => {
 
     // --- SESSÃO 2 (Conversation - IDs 16 e 17) ---
     if (moduleId === 16 || moduleId === 17) {
+        // Se já é premium, mostra o temporizador direto
+        if (localStorage.getItem('isPremium') === 'true') {
+             setPremiumPrice('R$ 19,90');
+             setIsPremiumModalOpen(true);
+             return;
+        }
+
         // FASE 1: Módulo 5 NÃO completado
         if (!progress.unlockedModules.includes(5)) { 
             const videoKey = moduleId === 16 ? 'val1' : 'ped1';
@@ -129,7 +130,6 @@ const HomePage: React.FC = () => {
                 setCurrentVideoKey(videoKey);
                 setCurrentVideoUrl(`/${videoKey}.mp4`);
             } else {
-                // Já viu, mostra mensagem de bloqueio
                 setLockedModalContent({
                     title: 'Acesso Restrito',
                     message: 'Conclua os 5 módulos acima para liberar todos os recursos de conversação.',
@@ -150,7 +150,7 @@ const HomePage: React.FC = () => {
                 setCurrentVideoKey(videoKey);
                 setCurrentVideoUrl(`/${videoKey}.mp4`);
             } else {
-                // Já viu o vídeo novo, abre direto o modal Premium
+                // Já viu o vídeo novo, abre modal Premium
                 setPremiumPrice('R$ 19,90');
                 setIsPremiumModalOpen(true);
             }
@@ -159,7 +159,6 @@ const HomePage: React.FC = () => {
     }
 
     // --- SESSÃO 3 e 4 (Advanced e Reading) ---
-    // Se clicar, abre o Modal Premium
     if ((moduleId >= 6 && moduleId <= 15) || (moduleId >= 26)) {
         setPremiumPrice('R$ 29,90'); 
         setIsPremiumModalOpen(true);
@@ -189,7 +188,6 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-black pb-20">
         
-        {/* Modal Simples Roxo */}
         <LockedModal 
             isOpen={isLockedModalOpen} 
             onClose={() => setIsLockedModalOpen(false)}
@@ -199,7 +197,6 @@ const HomePage: React.FC = () => {
             buttonText={lockedModalContent.buttonText}
         />
 
-        {/* NOVO Modal Premium (Com senha e timer) */}
         <PremiumModal 
             isOpen={isPremiumModalOpen} 
             onClose={() => setIsPremiumModalOpen(false)}
@@ -207,7 +204,6 @@ const HomePage: React.FC = () => {
             price={premiumPrice}
         />
 
-        {/* Player de Vídeo */}
         {currentVideoUrl && (
             <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
                 <video 
@@ -261,7 +257,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* SESSÃO 3 */}
+            {/* SESSÃO 3 (Advanced) */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>TERCEIRA SESSÃO - FRASES E DIÁLOGOS:</SectionTitle>
                 <ModuleCarousel
@@ -274,7 +270,7 @@ const HomePage: React.FC = () => {
                 />
             </section>
 
-            {/* SESSÃO 4 */}
+            {/* SESSÃO 4 (Reading) */}
             <section className="mb-12 md:mb-20">
                 <SectionTitle>QUARTA SESSÃO – LEITURA E ESCRITA:</SectionTitle>
                 <ModuleCarousel
