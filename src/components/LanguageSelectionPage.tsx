@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { languageModules } from '../data/modules';
-import ModuleCard from './ModuleCard'; // Use ModuleCard se LanguageCard não existir, ou vice-versa
+import ModuleCard from './ModuleCard';
 import PremiumModal from './PremiumModal'; 
-import FirstTimeModal from './FirstTimeModal'; // Mantenha se estiver usando
+import FirstTimeModal from './FirstTimeModal'; 
 
-// Chave para verificar se o quiz já foi feito
 const QUIZ_COMPLETED_KEY = 'englishQuizCompleted';
 
 const LanguageSelectionPage: React.FC = () => {
@@ -14,13 +13,11 @@ const LanguageSelectionPage: React.FC = () => {
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isFirstTimeModalOpen, setIsFirstTimeModalOpen] = useState(false);
 
-  // Lógica do Modal de Boas-Vindas (som) - Mantido
   React.useEffect(() => {
     const hasSeenWarning = localStorage.getItem('hasSeenSoundWarning');
     if (!hasSeenWarning) {
       setIsFirstTimeModalOpen(true);
     } else {
-      // Toca áudio idioma.mp3 se existir
       const audio = new Audio('/audio/narrations/efeito/idioma.mp3');
       audio.play().catch(e => console.error(e));
     }
@@ -42,7 +39,7 @@ const LanguageSelectionPage: React.FC = () => {
         navigate(`/${languageCode}/quiz`);
       }
     } else {
-      // Para qualquer outro idioma, abre o Modal Premium com preço padrão
+      // Abre o Modal Premium
       setIsPremiumModalOpen(true);
     }
   };
@@ -51,7 +48,7 @@ const LanguageSelectionPage: React.FC = () => {
     <div className="min-h-screen bg-black text-white flex flex-col justify-center">
       <FirstTimeModal isOpen={isFirstTimeModalOpen} onClose={handleCloseFirstTimeModal} />
       
-      {/* Novo Modal Premium */}
+      {/* O modal agora controla internamente se mostra pagamento ou temporizador */}
       <PremiumModal 
         isOpen={isPremiumModalOpen} 
         onClose={() => setIsPremiumModalOpen(false)}
@@ -73,7 +70,6 @@ const LanguageSelectionPage: React.FC = () => {
               <ModuleCard
                 title={module.title}
                 imageUrl={module.imageUrl}
-                // isLocked visualmente opcional
               />
             </div>
           ))}
