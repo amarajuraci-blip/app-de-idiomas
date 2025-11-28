@@ -20,7 +20,6 @@ const HomePage: React.FC = () => {
   
   // Modal Premium
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  // CORREÇÃO: Preço da Home definido fixo como 19,90
   const [premiumPrice, setPremiumPrice] = useState('R$ 19,90'); 
 
   // --- VÍDEO ---
@@ -33,8 +32,6 @@ const HomePage: React.FC = () => {
   const [isModule3AudioLocked, setIsModule3AudioLocked] = useState(false);
   const [isModule4AudioLocked, setIsModule4AudioLocked] = useState(false);
   const [isModule5AudioLocked, setIsModule5AudioLocked] = useState(false);
-
-  const isMod5Finished = progress.completedReviews[5];
 
   useEffect(() => {
     if (!lang) return;
@@ -99,7 +96,7 @@ const HomePage: React.FC = () => {
             buttonText: 'INICIAR',
             onAction: () => {
                 setIsLockedModalOpen(false);
-                setPremiumPrice('R$ 19,90'); // Garante o preço da Home
+                setPremiumPrice('R$ 19,90'); // Preço correto para Home
                 setIsPremiumModalOpen(true); 
             }
         });
@@ -110,29 +107,29 @@ const HomePage: React.FC = () => {
   };
 
   const handleModuleClick = (moduleId: number) => {
-    // 1. Bloqueios de áudio da Sessão 1
+    // Se já é premium, não precisa verificar pagamentos
+    const isPremium = localStorage.getItem('isPremium') === 'true';
+
+    // 1. Bloqueios de áudio da Sessão 1 (Prioridade)
     if (moduleId === 1 && isModule1AudioLocked) return;
     if (moduleId === 2 && isModule2AudioLocked) return;
     if (moduleId === 3 && isModule3AudioLocked) return;
     if (moduleId === 4 && isModule4AudioLocked) return;
     if (moduleId === 5 && isModule5AudioLocked) return;
 
-    // Se já é premium, o modal abre direto no temporizador (controlado pelo componente PremiumModal)
-    const isPremium = localStorage.getItem('isPremium') === 'true';
-
     // --- SESSÃO 2 (IDs 16 a 21) ---
     if (moduleId >= 16 && moduleId <= 21) {
         
-        // Módulos 1 e 2 da Sessão 2 (Vídeos Especiais)
+        // Módulos 1 e 2 da Sessão 2 (Vídeos Especiais) - IDs 16 e 17
         if (moduleId === 16 || moduleId === 17) {
             if (isPremium) {
                 setPremiumPrice('R$ 19,90');
-                setIsPremiumModalOpen(true);
+                setIsPremiumModalOpen(true); // Se for premium, abre timer (modal controla isso)
                 return;
             }
 
             // FASE 1: Antes de terminar Mod 5
-            if (!isMod5Finished) { 
+            if (!progress.unlockedModules.includes(5)) { 
                 const videoKey = moduleId === 16 ? 'val1' : 'ped1';
                 const hasWatched = moduleId === 16 ? progress.hasWatchedVal1 : progress.hasWatchedPed1;
 
@@ -160,29 +157,25 @@ const HomePage: React.FC = () => {
                     setCurrentVideoKey(videoKey);
                     setCurrentVideoUrl(`/${videoKey}.mp4`);
                 } else {
-                    setPremiumPrice('R$ 19,90'); // Garante o preço da Home
+                    setPremiumPrice('R$ 19,90');
                     setIsPremiumModalOpen(true);
                 }
                 return;
             }
         }
 
-        // Módulos 3, 4, 5, 6 da Sessão 2 (Restantes)
+        // Módulos 3, 4, 5, 6 da Sessão 2 (IDs 18-21) - Pagamento Direto
         if (moduleId >= 18) {
-            if (isMod5Finished) {
-                setPremiumPrice('R$ 19,90'); // Garante o preço da Home
-                setIsPremiumModalOpen(true);
-            }
+            setPremiumPrice('R$ 19,90');
+            setIsPremiumModalOpen(true);
             return;
         }
     }
 
     // --- SESSÃO 3 (IDs 6-15) e SESSÃO 4 (IDs 26-30) ---
     if ((moduleId >= 6 && moduleId <= 15) || (moduleId >= 26)) {
-        if (isMod5Finished) {
-            setPremiumPrice('R$ 19,90'); // CORREÇÃO: Preço da Home aqui também
-            setIsPremiumModalOpen(true);
-        }
+        setPremiumPrice('R$ 19,90'); // Preço corrigido
+        setIsPremiumModalOpen(true);
         return;
     }
 
@@ -271,7 +264,9 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={listeningPractice.map(module => ({
                         ...module,
-                        isLocked: !progress.unlockedModules.includes(module.id)
+                        // IDs 16 e 17 (index 0 e 1): dependem de unlockedModules (desbloqueio por tempo/sequencia)
+                        // IDs 18 a 21 (restante): isLocked=false (colorido), mas clique leva ao pagamento
+                        isLocked: (module.id === 16 || module.id === 17) ? !progress.unlockedModules.includes(module.id) : false
                     }))}
                     sectionType="bonus"
                     onModuleClick={handleModuleClick}
@@ -284,7 +279,7 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={advancedModules.map(module => ({
                         ...module,
-                        isLocked: true 
+                        isLocked: false // Colorido e clicável (vai para pagamento)
                     }))}
                     sectionType="howto"
                     onModuleClick={handleModuleClick}
@@ -297,7 +292,7 @@ const HomePage: React.FC = () => {
                 <ModuleCarousel
                     modules={readingAndWriting.map(module => ({
                         ...module,
-                        isLocked: true
+                        isLocked: false // Colorido e clicável (vai para pagamento)
                     }))}
                     sectionType="course"
                     onModuleClick={handleModuleClick}
