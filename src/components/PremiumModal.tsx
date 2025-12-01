@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LockKeyhole, Copy, Check, Unlock } from 'lucide-react';
+import { X, LockKeyhole, Copy, Check, Unlock, ChevronRight } from 'lucide-react';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -15,7 +15,8 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number}>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  const targetDate = new Date('2025-12-01T00:00:00');
+  // --- ALTERAÇÃO AQUI: Data mudada para dia 02 ---
+  const targetDate = new Date('2025-12-02T00:00:00');
 
   useEffect(() => {
     if (isOpen) {
@@ -44,6 +45,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
             minutes: Math.floor((difference / 1000 / 60) % 60),
             seconds: Math.floor((difference / 1000) % 60),
           });
+        } else {
+          // Opcional: O que acontece quando o tempo zera?
+          // Por enquanto para no 00:00:00
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+          clearInterval(interval);
         }
       }, 1000);
       return () => clearInterval(interval);
@@ -176,7 +182,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, pixKey, pr
             <div className="bg-purple-900/20 border border-purple-500/30 rounded-xl p-4 mb-6">
               <p className="text-purple-300 text-xs uppercase font-bold mb-2">Liberação Oficial</p>
               <div className="text-3xl font-mono text-white font-bold tracking-wider">
-                01 DEZ 2025
+                02 DEZ 2025
               </div>
               <div className="grid grid-cols-4 gap-2 mt-4 text-center">
                 <div>
